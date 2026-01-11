@@ -1,0 +1,88 @@
+@model LearnSphere.ViewModels.CreateCourseViewModel
+
+@{
+    ViewData["Title"] = "Create Course";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Course</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter course title" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Describe what students will learn in this course"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label"></label>
+                                <select asp-for="CategoryId" class="form-select">
+                                    <option value="">-- Select Category --</option>
+                                    <option value="1">Web Development</option>
+                                    <option value="2">Data Science</option>
+                                    <option value="3">Mobile Development</option>
+                                    <option value="4">Programming Languages</option>
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DifficultyLevel" class="form-label"></label>
+                                <select asp-for="DifficultyLevel" class="form-select">
+                                    <option value="0">Beginner</option>
+                                    <option value="1">Intermediate</option>
+                                    <option value="2">Advanced</option>
+                                    <option value="3">Expert</option>
+                                </select>
+                                <span asp-validation-for="DifficultyLevel" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Price" class="form-label"></label>
+                                <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                                <div class="form-text">Set to 0 for a free course</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ThumbnailUrl" class="form-label"></label>
+                                <input asp-for="ThumbnailUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                                <span asp-validation-for="ThumbnailUrl" class="text-danger small"></span>
+                                <div class="form-text">Optional course thumbnail URL</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Create Course
+                            </button>
+                            <a asp-action="MyCourses" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
