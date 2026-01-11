@@ -8,12 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planning
-- User authentication system with login/register pages
+- User authentication UI with login/register pages
 - Course management UI (create, edit, publish)
 - Student enrollment and progress tracking UI
 - Certificate generation and verification
 - Payment gateway integration
 - Real-time notifications
+
+---
+
+## [0.4.0] - 2026-01-11
+
+### Added
+- **Service Layer Implementation**
+  - ICourseService interface with CRUD and workflow operations
+  - CourseService with business logic for course management (create, update, delete, publish, archive)
+  - IEnrollmentService interface for enrollment and progress tracking
+  - EnrollmentService with enrollment rules, progress calculation, and certificate generation
+  - Business rule enforcement (only delete draft courses, course version tracking, etc.)
+  - Automatic progress recalculation on lesson completion
+  - Certificate generation with unique verification IDs
+  - Service layer dependency injection registration
+
+### Technical Details
+- Service layer separates business logic from controllers
+- Uses Unit of Work pattern for transaction management
+- Async/await for non-blocking operations
+- Comprehensive logging for auditing
+- Try-catch error handling throughout
 
 ---
 
