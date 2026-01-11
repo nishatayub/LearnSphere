@@ -1,8 +1,104 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<LearnSphere.Models.Course>
+
+@{
+    ViewData["Title"] = "Welcome to LearnSphere";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<div class="bg-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="display-4 fw-bold mb-3">Learn Without Limits</h1>
+                <p class="lead mb-4">Discover thousands of courses taught by expert instructors. Build your skills, advance your career, and achieve your goals.</p>
+                <a asp-controller="Course" asp-action="Index" class="btn btn-light btn-lg me-2">
+                    <i class="bi bi-book"></i> Browse Courses
+                </a>
+                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-person-plus"></i> Sign Up Free
+                </a>
+            </div>
+            <div class="col-lg-5 text-center">
+                <i class="bi bi-mortarboard-fill" style="font-size: 10rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Courses Section -->
+<div class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Featured Courses</h2>
+        <a asp-controller="Course" asp-action="Index" class="btn btn-outline-primary">
+            View All <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var course in Model.Take(6))
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        @if (!string.IsNullOrEmpty(course.ThumbnailUrl))
+                        {
+                            <img src="@course.ThumbnailUrl" class="card-img-top" alt="@course.Title" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-book" style="font-size: 4rem;"></i>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@course.Title</h5>
+                            <p class="card-text text-muted small">@course.Description?.Substring(0, Math.Min(100, course.Description.Length))...</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">@course.Difficulty</span>
+                                <span class="text-primary fw-bold">
+                                    <text>FREE</text>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a asp-controller="Course" asp-action="Details" asp-route-id="@course.Id" class="btn btn-primary w-100">
+                                Learn More <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No courses available yet. Check back soon!
+        </div>
+    }
+</div>
+
+<!-- Features Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5">Why Choose LearnSphere?</h2>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <i class="bi bi-trophy text-primary mb-3" style="font-size: 3rem;"></i>
+                <h4>Expert Instructors</h4>
+                <p class="text-muted">Learn from industry professionals with years of experience</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="bi bi-clock-history text-primary mb-3" style="font-size: 3rem;"></i>
+                <h4>Learn at Your Pace</h4>
+                <p class="text-muted">Access courses anytime, anywhere, on any device</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="bi bi-patch-check text-primary mb-3" style="font-size: 3rem;"></i>
+                <h4>Get Certified</h4>
+                <p class="text-muted">Earn certificates upon course completion to showcase your skills</p>
+            </div>
+        </div>
+    </div>
 </div>
