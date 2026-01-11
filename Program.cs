@@ -2,6 +2,8 @@ using LearnSphere.Data;
 using LearnSphere.Models;
 using LearnSphere.Repositories;
 using LearnSphere.Repositories.Interfaces;
+using LearnSphere.Services;
+using LearnSphere.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,6 +41,10 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+
+// Register Service Layer
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
 var app = builder.Build();
 
