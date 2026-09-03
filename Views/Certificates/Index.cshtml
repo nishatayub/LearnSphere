@@ -1,0 +1,34 @@
+@model IEnumerable<LearnSphere.Models.Certificate>
+
+@{
+    ViewData["Title"] = "My Certificates";
+}
+
+<h1 class="mb-4">My Certificates</h1>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">
+        You haven't earned any certificates yet. Complete a course to earn one.
+    </p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var certificate in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@certificate.Course.Title</h5>
+                        <p class="text-muted small mb-1">Issued @certificate.IssuedDate.ToString("MMMM d, yyyy")</p>
+                        <p class="text-muted small mb-0">Verification ID: <code>@certificate.VerificationId</code></p>
+                    </div>
+                    <div class="card-footer">
+                        <a asp-controller="Certificates" asp-action="Verify" asp-route-verificationId="@certificate.VerificationId" class="btn btn-sm btn-outline-primary">View / Verify</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

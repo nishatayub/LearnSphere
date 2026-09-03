@@ -1,0 +1,36 @@
+@model LearnSphere.Models.Certificate?
+
+@{
+    ViewData["Title"] = "Verify a Certificate";
+    string? searchedId = ViewBag.VerificationId;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h1 class="mb-4">Verify a Certificate</h1>
+
+        <form asp-controller="Certificates" asp-action="Verify" method="get" class="d-flex gap-2 mb-4">
+            <input type="text" name="verificationId" value="@searchedId" class="form-control" placeholder="Enter verification ID" />
+            <button type="submit" class="btn btn-primary">Verify</button>
+        </form>
+
+        @if (!string.IsNullOrWhiteSpace(searchedId))
+        {
+            if (Model == null)
+            {
+                <div class="alert alert-danger">
+                    No certificate found for verification ID <code>@searchedId</code>.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success">
+                    <h5 class="alert-heading">Certificate Verified</h5>
+                    <p class="mb-1"><strong>@Model.User.FirstName @Model.User.LastName</strong> completed</p>
+                    <p class="mb-1"><strong>@Model.Course.Title</strong></p>
+                    <p class="mb-0 small">Issued @Model.IssuedDate.ToString("MMMM d, yyyy")</p>
+                </div>
+            }
+        }
+    </div>
+</div>
