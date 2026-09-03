@@ -1,0 +1,54 @@
+@model LearnSphere.Models.Course
+
+@{
+    ViewData["Title"] = Model.Title;
+    var lessons = Model.CurrentVersion?.Lessons.OrderBy(l => l.OrderIndex) ?? Enumerable.Empty<LearnSphere.Models.Lesson>();
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <span class="badge bg-secondary mb-2">@Model.Difficulty</span>
+        <h1>@Model.Title</h1>
+        <p class="text-muted">
+            By @Model.Instructor.FirstName @Model.Instructor.LastName &middot; @Model.Category.Name &middot; @Model.EstimatedDurationHours hrs
+        </p>
+        <p>@Model.Description</p>
+
+        <h2 class="h4 mt-4">Lessons</h2>
+        @if (!lessons.Any())
+        {
+            <p class="text-muted">Lessons for this course haven't been published yet.</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var lesson in lessons)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            @lesson.OrderIndex. @lesson.Title
+                            @if (lesson.IsFree)
+                            {
+                                <span class="badge bg-success ms-2">Free</span>
+                            }
+                        </span>
+                        <span class="text-muted small">@lesson.DurationMinutes min</span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <p class="mb-1"><strong>@Model.TotalEnrollments</strong> students enrolled</p>
+                @if (Model.AverageRating.HasValue)
+                {
+                    <p class="mb-3">Rating: @Model.AverageRating.Value.ToString("0.0") / 5</p>
+                }
+                <a asp-controller="Account" asp-action="Register" class="btn btn-primary w-100">Enroll</a>
+            </div>
+        </div>
+    </div>
+</div>
