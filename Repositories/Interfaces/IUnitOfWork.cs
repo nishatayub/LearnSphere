@@ -11,7 +11,7 @@ namespace LearnSphere.Repositories.Interfaces
         // Repository properties - access to all repositories
         ICourseRepository Courses { get; }
         IRepository<Category> Categories { get; }
-        IRepository<Enrollment> Enrollments { get; }
+        IEnrollmentRepository Enrollments { get; }
         IRepository<Lesson> Lessons { get; }
         IRepository<Progress> ProgressRecords { get; }
         IRepository<Certificate> Certificates { get; }
