@@ -31,7 +31,6 @@ namespace LearnSphere.Models
 
         public EnrollmentStatus Status { get; set; } = EnrollmentStatus.Active;
 
-        [Column(TypeName = "decimal(5,2)")]
         public decimal ProgressPercentage { get; set; } = 0;
 
         public DateTime? LastAccessedDate { get; set; }

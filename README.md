@@ -504,9 +504,8 @@ LearnSphere was architected with **real-world educational challenges** in mind:
 
 ```
 Supported Databases:
-├── SQL Server (Primary)
-├── PostgreSQL (Recommended for cloud)
-└── MySQL (Community edition)
+├── SQLite (Default - zero setup, great for local dev)
+└── SQL Server (Swap in for production deployments)
 
 Configuration: Code-First Migrations
 ```
@@ -646,10 +645,11 @@ RetentionTest
 
 Before you begin, ensure you have the following installed:
 
-- **.NET SDK 6.0+** ([Download](https://dotnet.microsoft.com/download))
-- **SQL Server** / **PostgreSQL** / **MySQL**
+- **.NET SDK 9.0+** ([Download](https://dotnet.microsoft.com/download))
 - **Visual Studio 2022** or **VS Code** with C# extension
 - **Git** (for version control)
+
+No separate database server is required — the project uses SQLite by default, so the database is just a local file.
 
 ### Installation
 
@@ -668,15 +668,17 @@ dotnet restore
 
 #### 3️⃣ Configure Database Connection
 
-Edit `appsettings.json`:
+The default `appsettings.json` already points to a local SQLite file, so this step can be skipped for local development:
 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=LearnSphereDB;Trusted_Connection=True;"
+    "DefaultConnection": "Data Source=LearnSphere.db"
   }
 }
 ```
+
+To use SQL Server instead, swap the `Microsoft.EntityFrameworkCore.Sqlite` package for `Microsoft.EntityFrameworkCore.SqlServer`, update `Program.cs` to call `UseSqlServer(...)`, and point the connection string at your instance.
 
 #### 4️⃣ Apply Database Migrations
 

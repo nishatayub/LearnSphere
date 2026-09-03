@@ -62,10 +62,6 @@ namespace LearnSphere.Data
                     .HasForeignKey(c => c.CurrentVersionId)
                     .OnDelete(DeleteBehavior.SetNull)
                     .IsRequired(false);
-
-                // Configure decimal precision
-                entity.Property(c => c.AverageRating)
-                    .HasColumnType("decimal(3,2)");
             });
 
             // CourseVersion Configuration
@@ -117,10 +113,6 @@ namespace LearnSphere.Data
                     .WithMany(cv => cv.Enrollments)
                     .HasForeignKey(e => e.CourseVersionId)
                     .OnDelete(DeleteBehavior.Restrict);
-
-                // Configure decimal precision
-                entity.Property(e => e.ProgressPercentage)
-                    .HasColumnType("decimal(5,2)");
             });
 
             // Progress Configuration

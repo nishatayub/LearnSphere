@@ -53,7 +53,6 @@ namespace LearnSphere.Models
 
         public int EstimatedDurationHours { get; set; }
 
-        [Column(TypeName = "decimal(3,2)")]
         public decimal? AverageRating { get; set; }
 
         public int TotalEnrollments { get; set; } = 0;
