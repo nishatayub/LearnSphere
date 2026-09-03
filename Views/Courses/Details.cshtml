@@ -47,7 +47,17 @@
                 {
                     <p class="mb-3">Rating: @Model.AverageRating.Value.ToString("0.0") / 5</p>
                 }
-                <a asp-controller="Account" asp-action="Register" class="btn btn-primary w-100">Enroll</a>
+                @if (User.Identity is { IsAuthenticated: true })
+                {
+                    <form asp-controller="Enrollments" asp-action="Enroll" method="post">
+                        <input type="hidden" name="courseId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary w-100">Enroll</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Courses", new { id = Model.Id })" class="btn btn-primary w-100">Log in to enroll</a>
+                }
             </div>
         </div>
     </div>

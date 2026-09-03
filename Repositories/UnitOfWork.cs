@@ -17,7 +17,7 @@ namespace LearnSphere.Repositories
         // Lazy initialization - repositories created only when needed
         private ICourseRepository? _courses;
         private IRepository<Category>? _categories;
-        private IRepository<Enrollment>? _enrollments;
+        private IEnrollmentRepository? _enrollments;
         private IRepository<Lesson>? _lessons;
         private IRepository<Progress>? _progressRecords;
         private IRepository<Certificate>? _certificates;
@@ -35,8 +35,8 @@ namespace LearnSphere.Repositories
         public IRepository<Category> Categories => 
             _categories ??= new Repository<Category>(_context);
 
-        public IRepository<Enrollment> Enrollments => 
-            _enrollments ??= new Repository<Enrollment>(_context);
+        public IEnrollmentRepository Enrollments =>
+            _enrollments ??= new EnrollmentRepository(_context);
 
         public IRepository<Lesson> Lessons => 
             _lessons ??= new Repository<Lesson>(_context);

@@ -1,0 +1,43 @@
+@model IEnumerable<LearnSphere.Models.Enrollment>
+
+@{
+    ViewData["Title"] = "My Courses";
+}
+
+<h1 class="mb-4">My Courses</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+@if (!Model.Any())
+{
+    <p class="text-muted">
+        You haven't enrolled in any courses yet.
+        <a asp-controller="Courses" asp-action="Index">Browse courses</a> to get started.
+    </p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var enrollment in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <span class="badge bg-secondary mb-2">@enrollment.Status</span>
+                        <h5 class="card-title">@enrollment.Course.Title</h5>
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar" style="width: @(enrollment.ProgressPercentage)%"></div>
+                        </div>
+                        <p class="text-muted small mb-0">@enrollment.ProgressPercentage% complete</p>
+                    </div>
+                    <div class="card-footer">
+                        <a asp-controller="Courses" asp-action="Details" asp-route-id="@enrollment.CourseId" class="btn btn-sm btn-outline-primary">Continue</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
