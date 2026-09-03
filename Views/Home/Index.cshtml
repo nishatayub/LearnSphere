@@ -1,8 +1,69 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model LearnSphere.Models.ViewModels.HomeIndexViewModel
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero text-center py-5 mb-5">
+    <h1 class="display-5 fw-bold">Learn new skills, one course at a time</h1>
+    <p class="lead text-muted col-lg-7 mx-auto">
+        LearnSphere is a learning platform where instructors publish structured courses
+        and students track their progress from first lesson to certificate.
+    </p>
+    <div class="mt-4">
+        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg me-2">Get Started</a>
+        <a href="#categories" class="btn btn-outline-secondary btn-lg">Browse Categories</a>
+    </div>
+</section>
+
+<section id="categories" class="mb-5">
+    <h2 class="mb-4">Categories</h2>
+    @if (!Model.Categories.Any())
+    {
+        <p class="text-muted">No categories available yet.</p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+            @foreach (var category in Model.Categories)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@category.Name</h5>
+                            <p class="card-text text-muted small">@category.Description</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+<section class="mb-5">
+    <h2 class="mb-4">Featured Courses</h2>
+    @if (!Model.FeaturedCourses.Any())
+    {
+        <p class="text-muted">No published courses yet — check back soon.</p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var course in Model.FeaturedCourses)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <span class="badge bg-secondary mb-2">@course.Difficulty</span>
+                            <h5 class="card-title">@course.Title</h5>
+                            <p class="card-text small">@course.Description</p>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            By @course.Instructor.FirstName @course.Instructor.LastName &middot; @course.EstimatedDurationHours hrs
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
