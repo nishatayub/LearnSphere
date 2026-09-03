@@ -12,7 +12,7 @@ builder.Services.AddControllersWithViews();
 
 // Configure Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
+    options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configure Identity

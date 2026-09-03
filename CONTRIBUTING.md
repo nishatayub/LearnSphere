@@ -29,10 +29,11 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 ### Prerequisites
 
-- .NET SDK 6.0 or higher
-- SQL Server / PostgreSQL / MySQL
+- .NET SDK 9.0 or higher
 - Visual Studio 2022 or VS Code
 - Git
+
+No database server install is needed — the project uses SQLite by default.
 
 ### Setup
 
@@ -54,8 +55,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
    ```
 
 4. **Configure database**
-   - Copy `appsettings.example.json` to `appsettings.json`
-   - Update connection string
+   - No changes needed — `appsettings.json` already points to a local SQLite file
 
 5. **Apply migrations**
    ```bash
