@@ -1,0 +1,40 @@
+@model LearnSphere.Models.ViewModels.LearnViewModel
+
+@{
+    ViewData["Title"] = Model.Course.Title;
+}
+
+<h1 class="mb-1">@Model.Course.Title</h1>
+<p class="text-muted">@Model.Enrollment.ProgressPercentage% complete</p>
+
+<div class="progress mb-4" style="height: 8px;">
+    <div class="progress-bar" style="width: @(Model.Enrollment.ProgressPercentage)%"></div>
+</div>
+
+@if (Model.Enrollment.Status == LearnSphere.Models.EnrollmentStatus.Completed)
+{
+    <div class="alert alert-success">You've completed this course.</div>
+}
+
+<ul class="list-group">
+    @foreach (var item in Model.Lessons)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>@item.Lesson.OrderIndex. @item.Lesson.Title</strong>
+                @if (!string.IsNullOrEmpty(item.Lesson.Description))
+                {
+                    <div class="text-muted small">@item.Lesson.Description</div>
+                }
+            </div>
+            <form asp-controller="Courses" asp-action="ToggleLesson" method="post" class="d-flex align-items-center gap-2">
+                <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                <input type="hidden" name="lessonId" value="@item.Lesson.Id" />
+                <span class="text-muted small">@item.Lesson.DurationMinutes min</span>
+                <button type="submit" class="btn btn-sm @(item.IsCompleted ? "btn-success" : "btn-outline-secondary")">
+                    @(item.IsCompleted ? "Completed" : "Mark complete")
+                </button>
+            </form>
+        </li>
+    }
+</ul>

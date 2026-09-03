@@ -47,7 +47,11 @@
                 {
                     <p class="mb-3">Rating: @Model.AverageRating.Value.ToString("0.0") / 5</p>
                 }
-                @if (User.Identity is { IsAuthenticated: true })
+                @if (ViewBag.IsEnrolled == true)
+                {
+                    <a asp-controller="Courses" asp-action="Learn" asp-route-id="@Model.Id" class="btn btn-primary w-100">Continue Learning</a>
+                }
+                else if (User.Identity is { IsAuthenticated: true })
                 {
                     <form asp-controller="Enrollments" asp-action="Enroll" method="post">
                         <input type="hidden" name="courseId" value="@Model.Id" />
