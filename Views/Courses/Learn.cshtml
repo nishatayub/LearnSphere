@@ -13,7 +13,10 @@
 
 @if (Model.Enrollment.Status == LearnSphere.Models.EnrollmentStatus.Completed)
 {
-    <div class="alert alert-success">You've completed this course.</div>
+    <div class="alert alert-success d-flex justify-content-between align-items-center">
+        <span>You've completed this course.</span>
+        <a asp-controller="Certificates" asp-action="Index" class="btn btn-sm btn-success">View Certificate</a>
+    </div>
 }
 
 <ul class="list-group">

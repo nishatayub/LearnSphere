@@ -37,6 +37,9 @@
                                 <a class="nav-link text-dark" asp-controller="Enrollments" asp-action="Index">My Courses</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Certificates" asp-action="Index">My Certificates</a>
+                            </li>
+                            <li class="nav-item">
                                 <span class="nav-link text-dark">Hi, @User.Identity.Name</span>
                             </li>
                             <li class="nav-item">
@@ -67,7 +70,9 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - LearnSphere - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - LearnSphere -
+            <a asp-controller="Certificates" asp-action="Verify">Verify a Certificate</a> -
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

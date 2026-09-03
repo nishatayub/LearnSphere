@@ -14,7 +14,7 @@ namespace LearnSphere.Repositories.Interfaces
         IEnrollmentRepository Enrollments { get; }
         IRepository<Lesson> Lessons { get; }
         IRepository<Progress> ProgressRecords { get; }
-        IRepository<Certificate> Certificates { get; }
+        ICertificateRepository Certificates { get; }
         IRepository<CourseVersion> CourseVersions { get; }
         
         // Transaction management

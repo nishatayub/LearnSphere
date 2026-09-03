@@ -164,6 +164,7 @@ namespace LearnSphere.Controllers
             {
                 enrollment.Status = EnrollmentStatus.Completed;
                 enrollment.CompletedDate ??= DateTime.UtcNow;
+                await IssueCertificateIfNeededAsync(userId, courseId);
             }
             else if (enrollment.Status == EnrollmentStatus.Completed)
             {
@@ -175,6 +176,25 @@ namespace LearnSphere.Controllers
             await _unitOfWork.SaveChangesAsync();
 
             return RedirectToAction(nameof(Learn), new { id = courseId });
+        }
+
+        private async Task IssueCertificateIfNeededAsync(string userId, int courseId)
+        {
+            var existing = await _unitOfWork.Certificates.GetByUserAndCourseAsync(userId, courseId);
+
+            if (existing != null)
+            {
+                return;
+            }
+
+            var certificate = new Certificate
+            {
+                UserId = userId,
+                CourseId = courseId,
+                VerificationId = Guid.NewGuid().ToString("N")[..12].ToUpperInvariant()
+            };
+
+            await _unitOfWork.Certificates.AddAsync(certificate);
         }
     }
 }

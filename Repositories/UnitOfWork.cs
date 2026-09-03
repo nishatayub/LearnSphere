@@ -20,7 +20,7 @@ namespace LearnSphere.Repositories
         private IEnrollmentRepository? _enrollments;
         private IRepository<Lesson>? _lessons;
         private IRepository<Progress>? _progressRecords;
-        private IRepository<Certificate>? _certificates;
+        private ICertificateRepository? _certificates;
         private IRepository<CourseVersion>? _courseVersions;
 
         public UnitOfWork(ApplicationDbContext context)
@@ -44,8 +44,8 @@ namespace LearnSphere.Repositories
         public IRepository<Progress> ProgressRecords => 
             _progressRecords ??= new Repository<Progress>(_context);
 
-        public IRepository<Certificate> Certificates => 
-            _certificates ??= new Repository<Certificate>(_context);
+        public ICertificateRepository Certificates =>
+            _certificates ??= new CertificateRepository(_context);
 
         public IRepository<CourseVersion> CourseVersions => 
             _courseVersions ??= new Repository<CourseVersion>(_context);
