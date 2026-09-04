@@ -4,67 +4,434 @@
     ViewData["Title"] = "Home";
 }
 
-<section class="hero text-center py-5 mb-5">
-    <h1 class="display-5 fw-bold">Learn new skills, one course at a time</h1>
-    <p class="lead text-muted col-lg-7 mx-auto">
-        LearnSphere is a learning platform where instructors publish structured courses
-        and students track their progress from first lesson to certificate.
-    </p>
-    <div class="mt-4">
-        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg me-2">Get Started</a>
-        <a asp-controller="Courses" asp-action="Index" class="btn btn-outline-secondary btn-lg">Browse Courses</a>
-    </div>
-</section>
+@section Styles {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .home-redesign {
+            --navy: #1b2a4a;
+            --navy-soft: #2c3e63;
+            --mint: #e9f7f0;
+            --mint-deep: #cdeee0;
+            --cream: #fff6ea;
+            --orange: #ff9f45;
+            --orange-dark: #f2822a;
+            --muted: #5b6472;
+            font-family: 'Poppins', sans-serif;
+            color: var(--navy);
+        }
 
-<section id="categories" class="mb-5">
-    <h2 class="mb-4">Categories</h2>
-    @if (!Model.Categories.Any())
-    {
-        <p class="text-muted">No categories available yet.</p>
-    }
-    else
-    {
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
-            @foreach (var category in Model.Categories)
-            {
-                <div class="col">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">@category.Name</h5>
-                            <p class="card-text text-muted small">@category.Description</p>
+        .home-redesign h1, .home-redesign h2, .home-redesign h3 {
+            font-weight: 700;
+        }
+
+        .home-fullbleed {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+        }
+
+        .home-pill {
+            border-radius: 50rem;
+            padding: 0.75rem 1.75rem;
+            font-weight: 600;
+            border: none;
+        }
+
+        .home-pill-primary {
+            background: var(--orange);
+            color: var(--navy);
+        }
+
+        .home-pill-primary:hover {
+            background: var(--orange-dark);
+            color: var(--navy);
+        }
+
+        .home-pill-outline {
+            background: transparent;
+            border: 2px solid var(--navy);
+            color: var(--navy);
+        }
+
+        .home-pill-outline:hover {
+            background: var(--navy);
+            color: white;
+        }
+
+        .home-hero {
+            background: var(--mint);
+            padding: 5rem 0 6rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .home-hero::before, .home-hero::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            background: var(--mint-deep);
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .home-hero::before {
+            width: 260px;
+            height: 260px;
+            top: -80px;
+            right: 8%;
+        }
+
+        .home-hero::after {
+            width: 160px;
+            height: 160px;
+            bottom: -60px;
+            left: 6%;
+        }
+
+        .home-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .home-eyebrow {
+            display: inline-block;
+            background: white;
+            color: var(--orange-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.35rem 1rem;
+            border-radius: 50rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .home-icon-circle {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--orange);
+            color: var(--navy);
+            flex-shrink: 0;
+        }
+
+        .home-feature-card {
+            background: var(--cream);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            height: 100%;
+        }
+
+        .home-section {
+            padding: 5rem 0;
+        }
+
+        .home-section-muted {
+            background: #fbfaf7;
+        }
+
+        .home-course-card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 30px rgba(27, 42, 74, 0.06);
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .home-course-card .home-course-bar {
+            height: 6px;
+            background: var(--orange);
+        }
+
+        .home-course-card .card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .home-course-card .card-footer {
+            background: transparent;
+            border-top: 1px solid #f0efeb;
+            padding: 1rem 1.5rem;
+        }
+
+        .home-navy-band {
+            background: var(--navy);
+            color: white;
+            padding: 4.5rem 0;
+        }
+
+        .home-category-chip {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 1rem;
+            padding: 1.25rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            display: block;
+            height: 100%;
+            transition: background 0.15s ease;
+        }
+
+        .home-category-chip:hover {
+            background: rgba(255, 255, 255, 0.16);
+            color: white;
+        }
+
+        .home-stat-card {
+            background: var(--mint);
+            border-radius: 1.5rem;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            height: 100%;
+        }
+
+        .home-stat-number {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--navy);
+        }
+
+        .home-step {
+            text-align: center;
+            padding: 0 1rem;
+        }
+
+        .home-step-number {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: var(--navy);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+        }
+
+        .home-cta-band {
+            background: linear-gradient(135deg, var(--navy), var(--navy-soft));
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            border-radius: 1.5rem;
+        }
+    </style>
+}
+
+<div class="home-redesign">
+
+    <section class="home-hero home-fullbleed">
+        <div class="container">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8 home-hero-content">
+                    <span class="home-eyebrow">Role-based Learning Management System</span>
+                    <h1 class="display-4 mb-3">Learn new skills, one course at a time</h1>
+                    <p class="lead" style="color: var(--muted)">
+                        LearnSphere is a learning platform where instructors publish structured courses
+                        and students track their progress from first lesson to certificate.
+                    </p>
+                    <div class="mt-4 d-flex gap-3 justify-content-center flex-wrap">
+                        <a asp-controller="Account" asp-action="Register" class="home-pill home-pill-primary">Get Started</a>
+                        <a asp-controller="Courses" asp-action="Index" class="home-pill home-pill-outline">Browse Courses</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-5">
+                    <span class="home-eyebrow" style="color: var(--orange-dark)">Why LearnSphere</span>
+                    <h2 class="mb-3">Built around the way people actually learn and teach</h2>
+                    <p style="color: var(--muted)">
+                        Every role gets purpose-built tools instead of one generic dashboard stretched
+                        to fit everyone.
+                    </p>
+                    <a asp-controller="Account" asp-action="Register" class="home-pill home-pill-primary d-inline-block mt-2">Get Started</a>
+                </div>
+                <div class="col-lg-7">
+                    <div class="row row-cols-1 row-cols-sm-2 g-3">
+                        <div class="col">
+                            <div class="home-feature-card">
+                                <div class="home-icon-circle mb-3">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                </div>
+                                <h5>Role-based platform</h5>
+                                <p class="small mb-0" style="color: var(--muted)">Students, instructors, and admins each get their own dashboard and permissions.</p>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="home-feature-card">
+                                <div class="home-icon-circle mb-3">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                                </div>
+                                <h5>Version-safe courses</h5>
+                                <p class="small mb-0" style="color: var(--muted)">Instructors publish updates without disrupting students already enrolled.</p>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="home-feature-card">
+                                <div class="home-icon-circle mb-3">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                </div>
+                                <h5>Live progress tracking</h5>
+                                <p class="small mb-0" style="color: var(--muted)">Completion percentages and per-lesson breakdowns update as you go.</p>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="home-feature-card">
+                                <div class="home-icon-circle mb-3">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"></path></svg>
+                                </div>
+                                <h5>Auto-issued certificates</h5>
+                                <p class="small mb-0" style="color: var(--muted)">Issued on 100% completion, publicly verifiable by ID.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            }
+            </div>
         </div>
-    }
-</section>
+    </section>
 
-<section class="mb-5">
-    <h2 class="mb-4">Featured Courses</h2>
-    @if (!Model.FeaturedCourses.Any())
-    {
-        <p class="text-muted">No published courses yet — check back soon.</p>
-    }
-    else
-    {
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            @foreach (var course in Model.FeaturedCourses)
+    <section class="home-section home-section-muted">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="home-eyebrow" style="color: var(--orange-dark)">Catalog</span>
+                <h2>Featured Courses</h2>
+            </div>
+            @if (!Model.FeaturedCourses.Any())
             {
-                <div class="col">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <span class="badge bg-secondary mb-2">@course.Difficulty</span>
-                            <h5 class="card-title">@course.Title</h5>
-                            <p class="card-text small">@course.Description</p>
+                <p class="text-center" style="color: var(--muted)">No published courses yet — check back soon.</p>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    @foreach (var course in Model.FeaturedCourses)
+                    {
+                        <div class="col">
+                            <div class="home-course-card">
+                                <div class="home-course-bar"></div>
+                                <div class="card-body">
+                                    <span class="badge mb-2" style="background: var(--mint); color: var(--navy)">@course.Difficulty</span>
+                                    <h5>@course.Title</h5>
+                                    <p class="small mb-0" style="color: var(--muted)">@course.Description</p>
+                                </div>
+                                <div class="card-footer d-flex justify-content-between align-items-center">
+                                    <span class="small" style="color: var(--muted)">@course.EstimatedDurationHours hrs</span>
+                                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id" class="fw-semibold text-decoration-none" style="color: var(--orange-dark)">Learn more &rarr;</a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-footer d-flex justify-content-between align-items-center">
-                            <span class="text-muted small">@course.EstimatedDurationHours hrs</span>
-                            <a asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id" class="btn btn-sm btn-outline-primary">View Course</a>
-                        </div>
-                    </div>
+                    }
+                </div>
+                <div class="text-center mt-5">
+                    <a asp-controller="Courses" asp-action="Index" class="home-pill home-pill-outline">View all courses</a>
                 </div>
             }
         </div>
-    }
-</section>
+    </section>
+
+    <section class="home-navy-band home-fullbleed">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="mb-2">Explore by category</h2>
+                <p style="color: rgba(255,255,255,0.7)">Jump straight to the courses that match what you want to learn.</p>
+            </div>
+            @if (!Model.Categories.Any())
+            {
+                <p class="text-center" style="color: rgba(255,255,255,0.7)">No categories available yet.</p>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <div class="col">
+                            <a asp-controller="Courses" asp-action="Index" asp-route-categoryId="@category.Id" class="home-category-chip">
+                                <h5 class="mb-1">@category.Name</h5>
+                                <p class="small mb-0" style="color: rgba(255,255,255,0.7)">@category.Description</p>
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="home-section">
+        <div class="container">
+            <div class="row g-3">
+                <div class="col-6 col-lg-3">
+                    <div class="home-stat-card">
+                        <div class="home-stat-number">@Model.TotalPublishedCourses</div>
+                        <div class="small" style="color: var(--muted)">Published courses</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="home-stat-card">
+                        <div class="home-stat-number">@Model.Categories.Count()</div>
+                        <div class="small" style="color: var(--muted)">Categories</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="home-stat-card">
+                        <div class="home-stat-number">4</div>
+                        <div class="small" style="color: var(--muted)">Lesson formats: video, PDF, text, quiz</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="home-stat-card">
+                        <div class="home-stat-number">&infin;</div>
+                        <div class="small" style="color: var(--muted)">Free to browse and verify certificates</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section home-section-muted">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>How it works</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4 home-step">
+                    <div class="home-step-number">1</div>
+                    <h5>Browse &amp; enroll</h5>
+                    <p class="small" style="color: var(--muted)">Filter by category or difficulty and enroll in a published course.</p>
+                </div>
+                <div class="col-md-4 home-step">
+                    <div class="home-step-number">2</div>
+                    <h5>Learn at your pace</h5>
+                    <p class="small" style="color: var(--muted)">Work through lessons, quizzes, and track your live progress.</p>
+                </div>
+                <div class="col-md-4 home-step">
+                    <div class="home-step-number">3</div>
+                    <h5>Earn your certificate</h5>
+                    <p class="small" style="color: var(--muted)">Complete every lesson and get a certificate anyone can verify.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section">
+        <div class="container">
+            <div class="home-cta-band">
+                <h2 class="mb-3">Ready to start learning?</h2>
+                <p class="mb-4" style="color: rgba(255,255,255,0.75)">Create a free account and enroll in your first course today.</p>
+                <a asp-controller="Account" asp-action="Register" class="home-pill home-pill-primary">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+</div>
