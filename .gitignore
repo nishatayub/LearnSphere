@@ -166,3 +166,7 @@ coverage/
 tmp/
 temp/
 .claude/
+
+# Local test/publish output (matches what CI produces)
+/TestResults/
+/publish/
