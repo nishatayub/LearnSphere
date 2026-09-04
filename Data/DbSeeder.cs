@@ -148,7 +148,19 @@ namespace LearnSphere.Data
                             CourseVersionId = version.Id,
                             Title = "Introduction to C#",
                             Description = "Overview of C# and .NET ecosystem",
-                            ContentType = ContentType.Video,
+                            ContentType = ContentType.Text,
+                            Content = "C# is a general-purpose, object-oriented programming language "
+                                + "created by Microsoft and built on the .NET platform. It compiles to "
+                                + "an intermediate language (IL) that runs on the .NET runtime, which is "
+                                + "why the same C# code can run on Windows, macOS, and Linux.\n\n"
+                                + "A minimal C# program looks like this:\n\n"
+                                + "Console.WriteLine(\"Hello, LearnSphere!\");\n\n"
+                                + "That single line is a complete, runnable program - .NET's top-level "
+                                + "statements feature removes the need for an explicit Main method and "
+                                + "class wrapper for simple programs. Under the hood, the compiler still "
+                                + "generates a class with a Main method; it's just hidden from you.\n\n"
+                                + "In the next lessons you'll learn how to store data in variables, "
+                                + "control the flow of a program, and organize code into reusable methods.",
                             OrderIndex = 1,
                             DurationMinutes = 15,
                             IsFree = true
@@ -158,7 +170,19 @@ namespace LearnSphere.Data
                             CourseVersionId = version.Id,
                             Title = "Variables and Data Types",
                             Description = "Learn about different data types in C#",
-                            ContentType = ContentType.Video,
+                            ContentType = ContentType.Text,
+                            Content = "C# is statically typed, meaning every variable has a type that's "
+                                + "known at compile time. The most common built-in types are:\n\n"
+                                + "int age = 25;          // whole numbers\n"
+                                + "double price = 19.99;   // decimal numbers\n"
+                                + "bool isEnrolled = true; // true or false\n"
+                                + "string name = \"Jane\";   // text\n\n"
+                                + "You can also let the compiler infer the type with var:\n\n"
+                                + "var score = 100; // inferred as int\n\n"
+                                + "var doesn't make C# dynamically typed - the variable's type is still "
+                                + "fixed at compile time, it's just written for you. Use var when the "
+                                + "type is obvious from the right-hand side, and an explicit type when it "
+                                + "makes the code clearer to read.",
                             OrderIndex = 2,
                             DurationMinutes = 20,
                             IsFree = false
@@ -168,7 +192,26 @@ namespace LearnSphere.Data
                             CourseVersionId = version.Id,
                             Title = "Control Flow Statements",
                             Description = "If statements, loops, and switch cases",
-                            ContentType = ContentType.Video,
+                            ContentType = ContentType.Text,
+                            Content = "Control flow statements decide which code runs and how many times.\n\n"
+                                + "if / else branches on a condition:\n\n"
+                                + "if (score >= 60)\n"
+                                + "    Console.WriteLine(\"Pass\");\n"
+                                + "else\n"
+                                + "    Console.WriteLine(\"Fail\");\n\n"
+                                + "for loops repeat a fixed number of times:\n\n"
+                                + "for (int i = 0; i < 5; i++)\n"
+                                + "    Console.WriteLine(i);\n\n"
+                                + "foreach loops iterate over a collection:\n\n"
+                                + "foreach (var lesson in lessons)\n"
+                                + "    Console.WriteLine(lesson.Title);\n\n"
+                                + "switch expressions are a concise way to branch on a single value:\n\n"
+                                + "string label = difficulty switch\n"
+                                + "{\n"
+                                + "    DifficultyLevel.Beginner => \"Easy\",\n"
+                                + "    DifficultyLevel.Advanced => \"Hard\",\n"
+                                + "    _ => \"Somewhere in between\"\n"
+                                + "};",
                             OrderIndex = 3,
                             DurationMinutes = 25,
                             IsFree = false
@@ -178,7 +221,24 @@ namespace LearnSphere.Data
                             CourseVersionId = version.Id,
                             Title = "Methods and Functions",
                             Description = "Creating reusable code with methods",
-                            ContentType = ContentType.Video,
+                            ContentType = ContentType.Text,
+                            Content = "A method is a named, reusable block of code. It has a return type, "
+                                + "a name, and a parameter list:\n\n"
+                                + "int Add(int a, int b)\n"
+                                + "{\n"
+                                + "    return a + b;\n"
+                                + "}\n\n"
+                                + "Call it like this:\n\n"
+                                + "int result = Add(2, 3); // result is 5\n\n"
+                                + "If a method doesn't return a value, its return type is void:\n\n"
+                                + "void PrintWelcome(string name)\n"
+                                + "{\n"
+                                + "    Console.WriteLine($\"Welcome, {name}!\");\n"
+                                + "}\n\n"
+                                + "Breaking logic into small, well-named methods is one of the simplest "
+                                + "ways to make a program easier to read, test, and reuse - it's the same "
+                                + "idea behind the repository methods you'd find elsewhere in this project, "
+                                + "like GetPublishedCoursesAsync() instead of one long block of query code.",
                             OrderIndex = 4,
                             DurationMinutes = 30,
                             IsFree = false

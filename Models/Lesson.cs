@@ -32,6 +32,9 @@ namespace LearnSphere.Models
         [StringLength(500)]
         public string? ContentUrl { get; set; }
 
+        [StringLength(10000)]
+        public string? Content { get; set; }
+
         public int OrderIndex { get; set; }
 
         public int DurationMinutes { get; set; }
