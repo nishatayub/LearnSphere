@@ -34,7 +34,9 @@ namespace LearnSphere.Services
 
             using var message = new MailMessage
             {
-                From = new MailAddress(_options.SenderEmail, _options.SenderName),
+                // Gmail (and most SMTP providers) reject a From address that isn't the
+                // authenticated account, so use SmtpUsername rather than SenderEmail.
+                From = new MailAddress(_options.SmtpUsername, _options.SenderName),
                 Subject = subject,
                 Body = htmlBody,
                 IsBodyHtml = true
