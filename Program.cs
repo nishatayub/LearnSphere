@@ -2,6 +2,7 @@ using LearnSphere.Data;
 using LearnSphere.Models;
 using LearnSphere.Repositories;
 using LearnSphere.Repositories.Interfaces;
+using LearnSphere.Services;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -51,6 +52,19 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
+
+// Configure Email - real SMTP when credentials are present, otherwise a
+// no-op sender so local development needs no email account at all.
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
+var emailOptions = builder.Configuration.GetSection(EmailOptions.SectionName).Get<EmailOptions>();
+if (!string.IsNullOrWhiteSpace(emailOptions?.SmtpUsername) && !string.IsNullOrWhiteSpace(emailOptions.SmtpPassword))
+{
+    builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
+}
+else
+{
+    builder.Services.AddTransient<IEmailSender, NullEmailSender>();
+}
 
 var app = builder.Build();
 
