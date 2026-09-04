@@ -55,6 +55,10 @@ else
                                 <button type="submit" class="btn btn-sm btn-success">Publish</button>
                             </form>
                         }
+                        else if (course.Status == LearnSphere.Models.CourseStatus.Published)
+                        {
+                            <a asp-controller="Instructor" asp-action="NewVersion" asp-route-courseId="@course.Id" class="btn btn-sm btn-outline-secondary">New Version</a>
+                        }
                     </td>
                 </tr>
             }

@@ -171,6 +171,79 @@ namespace LearnSphere.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> NewVersion(int courseId)
+        {
+            var course = await GetOwnedCourseAsync(courseId);
+
+            if (course == null || course.Status != CourseStatus.Published)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Course = course;
+            return View(new NewVersionViewModel { CourseId = courseId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> NewVersion(NewVersionViewModel model)
+        {
+            var course = await GetOwnedCourseAsync(model.CourseId);
+
+            if (course == null || course.Status != CourseStatus.Published)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Course = course;
+                return View(model);
+            }
+
+            var currentVersion = await _unitOfWork.CourseVersions.GetByIdAsync(course.CurrentVersionId!.Value);
+            var currentLessons = await _unitOfWork.Lessons
+                .FindAsync(l => l.CourseVersionId == course.CurrentVersionId);
+
+            var newVersion = new CourseVersion
+            {
+                CourseId = course.Id,
+                VersionNumber = (currentVersion?.VersionNumber ?? 0) + 1,
+                Changelog = model.Changelog
+            };
+
+            await _unitOfWork.CourseVersions.AddAsync(newVersion);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Existing enrollments keep pointing at the old CourseVersionId, so students
+            // already partway through the course aren't disrupted by this update.
+            foreach (var lesson in currentLessons)
+            {
+                await _unitOfWork.Lessons.AddAsync(new Lesson
+                {
+                    CourseVersionId = newVersion.Id,
+                    Title = lesson.Title,
+                    Description = lesson.Description,
+                    ContentType = lesson.ContentType,
+                    Content = lesson.Content,
+                    ContentUrl = lesson.ContentUrl,
+                    OrderIndex = lesson.OrderIndex,
+                    DurationMinutes = lesson.DurationMinutes,
+                    IsFree = lesson.IsFree
+                });
+            }
+
+            course.CurrentVersionId = newVersion.Id;
+            course.UpdatedAt = DateTime.UtcNow;
+            _unitOfWork.Courses.Update(course);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            TempData["Message"] = $"Version {newVersion.VersionNumber} created. Edit its lessons below - students already enrolled keep their original content.";
+            return RedirectToAction(nameof(Lessons), new { courseId = course.Id });
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Enrollments(int courseId)
         {
             var course = await GetOwnedCourseAsync(courseId);
@@ -252,7 +325,10 @@ namespace LearnSphere.Controllers
                 .FindAsync(l => l.CourseVersionId == course.CurrentVersionId))
                 .OrderBy(l => l.OrderIndex);
 
+            var currentVersion = await _unitOfWork.CourseVersions.GetByIdAsync(course.CurrentVersionId!.Value);
+
             ViewBag.Course = course;
+            ViewBag.VersionNumber = currentVersion?.VersionNumber;
             return View(lessons);
         }
 
