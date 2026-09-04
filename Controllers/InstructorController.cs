@@ -187,6 +187,58 @@ namespace LearnSphere.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Analytics(int courseId)
+        {
+            var course = await GetOwnedCourseAsync(courseId);
+
+            if (course == null)
+            {
+                return NotFound();
+            }
+
+            var courseWithEnrollments = await _unitOfWork.Courses.GetCourseWithEnrollmentsAsync(courseId);
+            var enrollments = courseWithEnrollments!.Enrollments.ToList();
+
+            var lessons = (await _unitOfWork.Lessons
+                .FindAsync(l => l.CourseVersionId == course.CurrentVersionId))
+                .OrderBy(l => l.OrderIndex)
+                .ToList();
+
+            var enrollmentIds = enrollments.Select(e => e.Id).ToHashSet();
+            var completedProgress = (await _unitOfWork.ProgressRecords
+                .FindAsync(p => p.IsCompleted && enrollmentIds.Contains(p.EnrollmentId)))
+                .ToList();
+
+            var lessonStats = lessons.Select(lesson =>
+            {
+                var completedCount = completedProgress.Count(p => p.LessonId == lesson.Id);
+                return new LessonStatItem
+                {
+                    Lesson = lesson,
+                    CompletedCount = completedCount,
+                    CompletionRate = enrollments.Count == 0
+                        ? 0
+                        : Math.Round(100m * completedCount / enrollments.Count, 1)
+                };
+            });
+
+            var viewModel = new CourseAnalyticsViewModel
+            {
+                Course = course,
+                TotalEnrollments = enrollments.Count,
+                ActiveCount = enrollments.Count(e => e.Status == EnrollmentStatus.Active),
+                CompletedCount = enrollments.Count(e => e.Status == EnrollmentStatus.Completed),
+                DroppedCount = enrollments.Count(e => e.Status is EnrollmentStatus.Dropped or EnrollmentStatus.Suspended),
+                AverageProgress = enrollments.Count == 0
+                    ? 0
+                    : Math.Round(enrollments.Average(e => e.ProgressPercentage), 1),
+                LessonStats = lessonStats
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Lessons(int courseId)
         {
             var course = await GetOwnedCourseAsync(courseId);

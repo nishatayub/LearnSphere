@@ -46,6 +46,7 @@ else
                     </td>
                     <td class="text-end">
                         <a asp-controller="Instructor" asp-action="Lessons" asp-route-courseId="@course.Id" class="btn btn-sm btn-outline-secondary">Lessons</a>
+                        <a asp-controller="Instructor" asp-action="Analytics" asp-route-courseId="@course.Id" class="btn btn-sm btn-outline-secondary">Analytics</a>
                         <a asp-controller="Instructor" asp-action="EditCourse" asp-route-id="@course.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
                         @if (course.Status == LearnSphere.Models.CourseStatus.Draft)
                         {
