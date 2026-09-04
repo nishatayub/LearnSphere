@@ -24,7 +24,10 @@
     {
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
-                <strong>@item.Lesson.OrderIndex. @item.Lesson.Title</strong>
+                <strong>
+                    @item.Lesson.OrderIndex.
+                    <a asp-controller="Courses" asp-action="Lesson" asp-route-courseId="@Model.Course.Id" asp-route-lessonId="@item.Lesson.Id">@item.Lesson.Title</a>
+                </strong>
                 @if (!string.IsNullOrEmpty(item.Lesson.Description))
                 {
                     <div class="text-muted small">@item.Lesson.Description</div>

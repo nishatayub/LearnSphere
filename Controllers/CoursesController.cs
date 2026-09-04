@@ -101,9 +101,54 @@ namespace LearnSphere.Controllers
         }
 
         [Authorize]
+        public async Task<IActionResult> Lesson(int courseId, int lessonId)
+        {
+            var course = await _unitOfWork.Courses.GetCourseWithLessonsAsync(courseId);
+
+            if (course == null || course.Status != CourseStatus.Published)
+            {
+                return NotFound();
+            }
+
+            var userId = _userManager.GetUserId(User)!;
+            var enrollment = await _unitOfWork.Enrollments.GetByUserAndCourseAsync(userId, courseId);
+
+            if (enrollment == null)
+            {
+                return RedirectToAction(nameof(Details), new { id = courseId });
+            }
+
+            var orderedLessons = (course.CurrentVersion?.Lessons.OrderBy(l => l.OrderIndex) ?? Enumerable.Empty<Lesson>())
+                .ToList();
+            var lesson = orderedLessons.FirstOrDefault(l => l.Id == lessonId);
+
+            if (lesson == null)
+            {
+                return NotFound();
+            }
+
+            var isCompleted = (await _unitOfWork.ProgressRecords
+                .FindAsync(p => p.EnrollmentId == enrollment.Id && p.LessonId == lessonId))
+                .Any(p => p.IsCompleted);
+
+            var currentIndex = orderedLessons.FindIndex(l => l.Id == lessonId);
+
+            var viewModel = new LessonViewModel
+            {
+                Course = course,
+                Lesson = lesson,
+                IsCompleted = isCompleted,
+                PreviousLessonId = currentIndex > 0 ? orderedLessons[currentIndex - 1].Id : null,
+                NextLessonId = currentIndex < orderedLessons.Count - 1 ? orderedLessons[currentIndex + 1].Id : null
+            };
+
+            return View(viewModel);
+        }
+
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleLesson(int courseId, int lessonId)
+        public async Task<IActionResult> ToggleLesson(int courseId, int lessonId, string? returnUrl = null)
         {
             var userId = _userManager.GetUserId(User)!;
             var enrollment = await _unitOfWork.Enrollments.GetByUserAndCourseAsync(userId, courseId);
@@ -174,6 +219,11 @@ namespace LearnSphere.Controllers
 
             _unitOfWork.Enrollments.Update(enrollment);
             await _unitOfWork.SaveChangesAsync();
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
 
             return RedirectToAction(nameof(Learn), new { id = courseId });
         }
