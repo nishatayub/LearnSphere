@@ -1,0 +1,77 @@
+@model IEnumerable<LearnSphere.Models.ViewModels.UserListItemViewModel>
+
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<p class="text-muted mb-1"><a asp-controller="Admin" asp-action="Index">Admin Dashboard</a></p>
+<h1 class="mb-4">Manage Users</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Joined</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td>@user.CreatedAt.ToString("MMM d, yyyy")</td>
+                <td>
+                    <form asp-controller="Admin" asp-action="ChangeRole" method="post" class="d-flex gap-1">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <select name="role" class="form-select form-select-sm" style="width: auto;">
+                            @foreach (var role in new[] { "Student", "Instructor", "Admin" })
+                            {
+                                if (role == user.Role)
+                                {
+                                    <option value="@role" selected>@role</option>
+                                }
+                                else
+                                {
+                                    <option value="@role">@role</option>
+                                }
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Save</button>
+                    </form>
+                </td>
+                <td>
+                    @if (user.IsLockedOut)
+                    {
+                        <span class="badge bg-danger">Locked</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                </td>
+                <td class="text-end">
+                    <form asp-controller="Admin" asp-action="ToggleLock" method="post" class="d-inline">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <button type="submit" class="btn btn-sm @(user.IsLockedOut ? "btn-outline-success" : "btn-outline-danger")">
+                            @(user.IsLockedOut ? "Unlock" : "Lock")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
