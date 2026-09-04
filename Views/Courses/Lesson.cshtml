@@ -48,6 +48,45 @@
             }
             break;
 
+        case ContentType.Quiz:
+            if (!Model.QuizQuestions.Any())
+            {
+                <p class="text-muted">This quiz doesn't have any questions yet.</p>
+            }
+            else
+            {
+                if (Model.LatestQuizAttempt != null)
+                {
+                    var attempt = Model.LatestQuizAttempt;
+                    <div class="alert @(attempt.Passed ? "alert-success" : "alert-warning")">
+                        Last attempt: @attempt.CorrectAnswers / @attempt.TotalQuestions correct (@attempt.ScorePercentage%) -
+                        @(attempt.Passed ? "Passed" : "Not passed yet - score 70% or higher to complete this lesson.")
+                    </div>
+                }
+
+                <form asp-controller="Courses" asp-action="SubmitQuiz" method="post">
+                    <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                    <input type="hidden" name="lessonId" value="@Model.Lesson.Id" />
+
+                    @foreach (var question in Model.QuizQuestions)
+                    {
+                        <div class="mb-4">
+                            <p class="fw-bold">@question.OrderIndex. @question.Text</p>
+                            @foreach (var option in question.Options)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="answers[@question.Id]" value="@option.Id" id="option-@option.Id" required />
+                                    <label class="form-check-label" for="option-@option.Id">@option.Text</label>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <button type="submit" class="btn btn-primary">Submit Quiz</button>
+                </form>
+            }
+            break;
+
         default:
             <p class="text-muted">This content type isn't supported yet.</p>
             break;
@@ -62,14 +101,23 @@
         }
     </div>
 
-    <form asp-controller="Courses" asp-action="ToggleLesson" method="post">
-        <input type="hidden" name="courseId" value="@Model.Course.Id" />
-        <input type="hidden" name="lessonId" value="@Model.Lesson.Id" />
-        <input type="hidden" name="returnUrl" value="@Url.Action("Lesson", "Courses", new { courseId = Model.Course.Id, lessonId = Model.Lesson.Id })" />
-        <button type="submit" class="btn @(Model.IsCompleted ? "btn-success" : "btn-primary")">
-            @(Model.IsCompleted ? "Completed" : "Mark complete")
-        </button>
-    </form>
+    @if (Model.Lesson.ContentType == ContentType.Quiz)
+    {
+        <span class="badge @(Model.IsCompleted ? "bg-success" : "bg-secondary") align-self-center">
+            @(Model.IsCompleted ? "Completed" : "Not completed")
+        </span>
+    }
+    else
+    {
+        <form asp-controller="Courses" asp-action="ToggleLesson" method="post">
+            <input type="hidden" name="courseId" value="@Model.Course.Id" />
+            <input type="hidden" name="lessonId" value="@Model.Lesson.Id" />
+            <input type="hidden" name="returnUrl" value="@Url.Action("Lesson", "Courses", new { courseId = Model.Course.Id, lessonId = Model.Lesson.Id })" />
+            <button type="submit" class="btn @(Model.IsCompleted ? "btn-success" : "btn-primary")">
+                @(Model.IsCompleted ? "Completed" : "Mark complete")
+            </button>
+        </form>
+    }
 
     <div>
         @if (Model.NextLessonId.HasValue)

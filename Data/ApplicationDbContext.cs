@@ -19,6 +19,9 @@ namespace LearnSphere.Data
         public DbSet<Enrollment> Enrollments { get; set; }
         public DbSet<Progress> ProgressRecords { get; set; }
         public DbSet<Certificate> Certificates { get; set; }
+        public DbSet<QuizQuestion> QuizQuestions { get; set; }
+        public DbSet<QuizOption> QuizOptions { get; set; }
+        public DbSet<QuizAttempt> QuizAttempts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -151,6 +154,42 @@ namespace LearnSphere.Data
                 entity.HasOne(c => c.Course)
                     .WithMany(course => course.Certificates)
                     .HasForeignKey(c => c.CourseId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // QuizQuestion Configuration
+            modelBuilder.Entity<QuizQuestion>(entity =>
+            {
+                entity.HasIndex(e => new { e.LessonId, e.OrderIndex });
+
+                entity.HasOne(q => q.Lesson)
+                    .WithMany()
+                    .HasForeignKey(q => q.LessonId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // QuizOption Configuration
+            modelBuilder.Entity<QuizOption>(entity =>
+            {
+                entity.HasOne(o => o.QuizQuestion)
+                    .WithMany(q => q.Options)
+                    .HasForeignKey(o => o.QuizQuestionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // QuizAttempt Configuration
+            modelBuilder.Entity<QuizAttempt>(entity =>
+            {
+                entity.HasIndex(e => new { e.EnrollmentId, e.LessonId });
+
+                entity.HasOne(a => a.Enrollment)
+                    .WithMany()
+                    .HasForeignKey(a => a.EnrollmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(a => a.Lesson)
+                    .WithMany()
+                    .HasForeignKey(a => a.LessonId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
         }

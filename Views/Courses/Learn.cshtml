@@ -33,14 +33,27 @@
                     <div class="text-muted small">@item.Lesson.Description</div>
                 }
             </div>
-            <form asp-controller="Courses" asp-action="ToggleLesson" method="post" class="d-flex align-items-center gap-2">
-                <input type="hidden" name="courseId" value="@Model.Course.Id" />
-                <input type="hidden" name="lessonId" value="@item.Lesson.Id" />
-                <span class="text-muted small">@item.Lesson.DurationMinutes min</span>
-                <button type="submit" class="btn btn-sm @(item.IsCompleted ? "btn-success" : "btn-outline-secondary")">
-                    @(item.IsCompleted ? "Completed" : "Mark complete")
-                </button>
-            </form>
+            @if (item.Lesson.ContentType == LearnSphere.Models.ContentType.Quiz)
+            {
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted small">@item.Lesson.DurationMinutes min</span>
+                    <a asp-controller="Courses" asp-action="Lesson" asp-route-courseId="@Model.Course.Id" asp-route-lessonId="@item.Lesson.Id"
+                       class="btn btn-sm @(item.IsCompleted ? "btn-success" : "btn-outline-secondary")">
+                        @(item.IsCompleted ? "Passed" : "Take Quiz")
+                    </a>
+                </div>
+            }
+            else
+            {
+                <form asp-controller="Courses" asp-action="ToggleLesson" method="post" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                    <input type="hidden" name="lessonId" value="@item.Lesson.Id" />
+                    <span class="text-muted small">@item.Lesson.DurationMinutes min</span>
+                    <button type="submit" class="btn btn-sm @(item.IsCompleted ? "btn-success" : "btn-outline-secondary")">
+                        @(item.IsCompleted ? "Completed" : "Mark complete")
+                    </button>
+                </form>
+            }
         </li>
     }
 </ul>

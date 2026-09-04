@@ -11,5 +11,9 @@ namespace LearnSphere.Models.ViewModels
         public int? PreviousLessonId { get; set; }
 
         public int? NextLessonId { get; set; }
+
+        public IEnumerable<QuizQuestion> QuizQuestions { get; set; } = new List<QuizQuestion>();
+
+        public QuizAttempt? LatestQuizAttempt { get; set; }
     }
 }

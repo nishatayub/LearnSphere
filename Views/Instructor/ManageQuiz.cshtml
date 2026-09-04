@@ -1,0 +1,50 @@
+@model IEnumerable<LearnSphere.Models.QuizQuestion>
+@using LearnSphere.Models
+@{
+    var lesson = (Lesson)ViewBag.Lesson;
+    var courseId = (int)ViewBag.CourseId;
+    ViewData["Title"] = "Manage Quiz";
+}
+
+<p class="text-muted mb-1"><a asp-controller="Instructor" asp-action="Lessons" asp-route-courseId="@courseId">@lesson.Title</a></p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Quiz Questions</h1>
+    <a asp-controller="Instructor" asp-action="AddQuizQuestion" asp-route-courseId="@courseId" asp-route-lessonId="@lesson.Id" class="btn btn-primary">+ Add Question</a>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No questions yet. Students can't take this quiz until you add at least one.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var question in Model)
+        {
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <strong>@question.OrderIndex. @question.Text</strong>
+                    <form asp-controller="Instructor" asp-action="DeleteQuizQuestion" method="post" onsubmit="return confirm('Remove this question?');">
+                        <input type="hidden" name="courseId" value="@courseId" />
+                        <input type="hidden" name="lessonId" value="@lesson.Id" />
+                        <input type="hidden" name="questionId" value="@question.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </div>
+                <ul class="list-unstyled mt-2 mb-0 small">
+                    @foreach (var option in question.Options)
+                    {
+                        <li class="@(option.IsCorrect ? "text-success fw-bold" : "text-muted")">
+                            @(option.IsCorrect ? "✓" : "•") @option.Text
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+    </ul>
+}
