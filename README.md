@@ -2,9 +2,8 @@
 
 # 🎓 LearnSphere
 
-### *Empowering Education Through Technology*
+### *A Role-Based Learning Management System*
 
-**A Scalable, Role-Based Learning Management System**  
 Built with ASP.NET Core MVC
 
 ---
@@ -20,14 +19,13 @@ Built with ASP.NET Core MVC
 ## 📖 Table of Contents
 
 - [Overview](#-overview)
-- [Vision & Objectives](#-vision--objectives)
-- [System Architecture](#-system-architecture)
 - [User Roles & Capabilities](#-user-roles--capabilities)
-- [Feature Catalog](#-feature-catalog)
-- [Design Philosophy](#-design-philosophy)
+- [Architecture](#-architecture)
 - [Technology Stack](#-technology-stack)
 - [Database Schema](#-database-schema)
 - [Getting Started](#-getting-started)
+- [Seeded Demo Accounts](#-seeded-demo-accounts)
+- [What's Not Built Yet](#-whats-not-built-yet)
 - [Roadmap](#-roadmap)
 - [License](#-license)
 - [About the Developer](#-about-the-developer)
@@ -36,606 +34,122 @@ Built with ASP.NET Core MVC
 
 ## 📚 Overview
 
-**LearnSphere** is a full-stack, enterprise-grade Learning Management System designed to deliver structured, accessible, and engaging educational experiences. Built on **ASP.NET Core MVC**, LearnSphere combines robust backend architecture with intuitive user interfaces to serve students, instructors, and administrators.
+**LearnSphere** is a full-stack Learning Management System built with **ASP.NET Core MVC**, covering the complete loop for three roles: **students** browse and complete courses, **instructors** author and publish content, and **admins** review and moderate the platform. Every feature described below is implemented and has been manually verified end-to-end in a running instance — nothing here is aspirational.
 
-This platform is engineered with **clean architecture principles**, ensuring scalability, maintainability, and security—making it suitable for real-world deployment in educational institutions, corporate training programs, and online learning platforms.
-
-### 🌟 What Sets LearnSphere Apart
-
-- **Industry-Standard Architecture** – Follows separation of concerns and SOLID principles
-- **Role-Based Access Control** – Granular permissions for students, instructors, and administrators
-- **Production-Ready Security** – ASP.NET Core Identity with claims-based authorization
-- **Scalable Design** – Built to grow from startup to enterprise scale
-- **Future-Proof Foundation** – Structured for API integration and mobile expansion
-
----
-
-## 🎯 Vision & Objectives
-
-### Our Mission
-
-To create an accessible, scalable learning environment that empowers educators to deliver high-quality content and enables learners to achieve their educational goals efficiently.
-
-### Project Goals
-
-| Goal | Description |
-|------|-------------|
-| 🏗️ **Scalability** | Build a system that grows with institutional needs |
-| 🛡️ **Security** | Implement industry-standard authentication and authorization |
-| 📐 **Clean Code** | Maintain separation of concerns and testable architecture |
-| 🎨 **User Experience** | Design intuitive interfaces for all user types |
-| 🔄 **Maintainability** | Enable easy updates, debugging, and feature additions |
-| 🚀 **Future-Ready** | Prepare for API services and mobile integration |
-
----
-
-## 🏛️ System Architecture
-
-LearnSphere implements a **layered architecture** that separates concerns and promotes maintainability:
-
-```
-┌─────────────────────────────────────────────────┐
-│         PRESENTATION LAYER (MVC)                │
-│  ┌─────────────┬─────────────┬─────────────┐   │
-│  │ Controllers │ Razor Views │ ViewModels  │   │
-│  └─────────────┴─────────────┴─────────────┘   │
-└─────────────────────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────┐
-│         APPLICATION LAYER                       │
-│  ┌─────────────────┬─────────────────────────┐ │
-│  │ Business Logic  │ Service Interfaces      │ │
-│  │ (Services)      │ Data Transfer Objects   │ │
-│  └─────────────────┴─────────────────────────┘ │
-└─────────────────────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────┐
-│         DATA ACCESS LAYER                       │
-│  ┌─────────────┬─────────────┬─────────────┐   │
-│  │  Entities   │  DbContext  │ Repositories│   │
-│  └─────────────┴─────────────┴─────────────┘   │
-└─────────────────────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────┐
-│         INFRASTRUCTURE LAYER                    │
-│  • Authentication & Authorization               │
-│  • Logging & Error Handling                     │
-│  • External Services Integration                │
-└─────────────────────────────────────────────────┘
-```
-
-### Architecture Benefits
-
-✅ **Prevents "Fat Controllers"** – Business logic resides in service layer  
-✅ **Enhances Testability** – Each layer can be tested independently  
-✅ **Improves Readability** – Clear separation makes codebase navigable  
-✅ **Enables Scalability** – Easy to extend without breaking existing code  
-✅ **Facilitates Migration** – Smooth transition to microservices if needed
+The project uses **ASP.NET Core Identity** for auth, **Entity Framework Core** (Code-First migrations) with **SQLite** by default so it runs with zero setup, and a **Repository + Unit of Work** pattern for data access.
 
 ---
 
 ## 👥 User Roles & Capabilities
 
-### 👤 Student Portal
+### 👤 Student
 
-Students access a personalized learning environment with comprehensive tools to manage their educational journey.
+| Feature | Details |
+|---------|---------|
+| **Account** | Register, log in, edit profile, change password, forgot/reset password |
+| **Course Discovery** | Search by keyword, filter by category and difficulty, sort (newest/title/most enrolled), paginated results |
+| **Enrollment** | Enroll in a published course (duplicate-enrollment guarded) |
+| **Learning** | Per-lesson content view (text, embedded video, or PDF link), Previous/Next navigation, mark-complete toggle |
+| **Progress** | Live completion percentage recalculated from actual lesson completions, "My Courses" dashboard |
+| **Certificates** | Auto-issued on 100% completion, listed under "My Certificates", publicly verifiable by ID with no login required |
 
-| Feature | Description |
-|---------|-------------|
-| 📝 **Account Management** | Self-service registration and profile management |
-| 🔍 **Course Discovery** | Browse catalog with advanced search and filters |
-| 📚 **Enrollment** | Enroll in courses with prerequisite validation |
-| 📊 **Progress Tracking** | Real-time visualization of course completion |
-| 📥 **Resource Access** | Download course materials and supplementary content |
-| 🎓 **Certification** | Receive verifiable certificates upon course completion |
+### 👨‍🏫 Instructor
 
----
+| Feature | Details |
+|---------|---------|
+| **Course Authoring** | Create/edit courses (title, description, category, difficulty, duration); starts as Draft |
+| **Lesson Authoring** | Add/edit/delete lessons (text content, video/PDF URL, order, duration, free-preview flag) |
+| **Publish Workflow** | Submit a Draft for admin review; can't submit without at least one lesson |
+| **Enrollment Monitoring** | Per-course list of enrolled students with status and live progress |
+| **Analytics** | Enrollment counts by status, average progress, per-lesson completion-rate breakdown |
+| **Versioning** | Publish a new version of a live course — existing enrollments keep the version they started on, new enrollments and the public listing get the update |
 
-### 👨‍🏫 Instructor Hub
+### 🛡️ Admin
 
-Instructors receive powerful content management tools to create and deliver engaging courses.
-
-| Feature | Description |
-|---------|-------------|
-| ➕ **Course Creation** | Build structured courses with rich content |
-| 📤 **Content Upload** | Add lessons, videos, PDFs, and interactive materials |
-| 👥 **Enrollment Monitoring** | View and manage student enrollments |
-| 📈 **Analytics Dashboard** | Track learner progress and engagement metrics |
-| 🔄 **Version Control** | Update content with course versioning system |
-| ✅ **Assessment Tools** | Create and manage course evaluations |
-
----
-
-### 🛡️ Administrator Console
-
-Administrators maintain platform integrity with comprehensive oversight and control tools.
-
-| Feature | Description |
-|---------|-------------|
-| ✔️ **Content Moderation** | Review and approve instructor-submitted courses |
-| 👤 **User Management** | Manage accounts, roles, and permissions |
-| 📊 **Platform Analytics** | Monitor system usage, enrollments, and trends |
-| 🔒 **Access Control** | Configure course visibility and availability |
-| 🚨 **Reporting System** | Handle flags, disputes, and quality concerns |
-| ⚙️ **System Configuration** | Manage platform settings and policies |
+| Feature | Details |
+|---------|---------|
+| **Dashboard** | Platform totals: users by role, published vs. total courses, courses pending review |
+| **Course Approval** | Review a submitted course (full content preview) and approve (→ Published) or reject (→ back to Draft) |
+| **User Management** | Reassign roles (Student/Instructor/Admin), lock/unlock accounts — both guarded against targeting your own account |
+| **Category Management** | Create, rename, delete categories; deletion is blocked while any course still references the category |
 
 ---
 
-## ✨ Feature Catalog
+## 🏛️ Architecture
 
-### 🔐 Authentication & Security
-
-- **ASP.NET Core Identity** – Industry-standard user management
-- **Role-Based Authorization** – Granular access control by user type
-- **Claims-Based Permissions** – Fine-grained feature access
-- **CSRF Protection** – Anti-forgery tokens on all forms
-- **Secure Password Hashing** – Industry-standard encryption
-- **Session Management** – Secure token-based authentication
-
-### 📚 Course Management System
-
-- **Multi-State Workflow** – Draft → Under Review → Published lifecycle
-- **Approval Pipeline** – Administrative review before publication
-- **Version Control** – Non-breaking content updates
-- **Categorization** – Organize by subject, difficulty, and tags
-- **Prerequisites** – Define course dependencies
-- **Rich Metadata** – Descriptions, learning objectives, duration estimates
-
-### 🧩 Lesson Framework
-
-- **Hierarchical Structure** – Organized modules and lessons
-- **Multi-Format Support** – Video, PDF, text, and interactive content
-- **Secure File Handling** – Validated uploads with size/type restrictions
-- **Access Control** – Role-based content visibility
-- **Sequential Learning** – Enforce lesson order when required
-- **Embedded Media** – Rich content presentation
-
-### 📈 Progress & Analytics
-
-- **Lesson Tracking** – Individual lesson completion status
-- **Course Progress** – Percentage-based completion calculation
-- **Time Investment** – Track learner engagement duration
-- **Completion Logic** – Automated eligibility for certificates
-- **Learner Dashboard** – Visual progress indicators
-- **Instructor Insights** – Student performance overview
-
-### 🏅 Certification System
-
-- **Automated Generation** – Issue certificates upon completion
-- **Unique Verification** – Each certificate has a verification ID
-- **Public Validation** – Verify certificate authenticity online
-- **Duplicate Prevention** – One certificate per user per course
-- **Professional Design** – PDF certificates with branding
-- **Permanent Records** – Certificates stored indefinitely
-
-### 🔎 Discovery & Search
-
-- **Keyword Search** – Find courses by title, description, or content
-- **Advanced Filters** – Category, difficulty, instructor, rating
-- **Sorting Options** – By popularity, date, rating, enrollment
-- **Pagination** – Efficient browsing of large catalogs
-- **Responsive Results** – Fast search with optimized queries
-
-### 📊 Role-Specific Dashboards
-
-| Dashboard | Key Metrics |
-|-----------|-------------|
-| **Student** | Active courses, progress, upcoming deadlines, achievements |
-| **Instructor** | Course performance, enrollment stats, student engagement |
-| **Admin** | Platform activity, user growth, revenue, content quality |
-
-### 🎫 Support Ticket System
-
-**Comprehensive Student Support & Feedback Mechanism**
-
-Students can raise tickets for various concerns through an intuitive workflow:
-
-#### Ticket Flow
-```
-1. Click "Raise Ticket" button
-   ↓
-2. Select Ticket Type from dropdown:
-   ├── 📝 Feedback
-   ├── 😞 Complaint
-   ├── ❓ Doubt/Question
-   ├── 🔧 Technical Issue
-   └── ⚠️ Platform Issue
-   ↓
-3. Fill detailed description
-   ↓
-4. Submit & receive ticket ID
-   ↓
-5. Track status & receive responses
-```
-
-#### Ticket Categories
-
-| Category | Purpose | Assigned To |
-|----------|---------|-------------|
-| **📝 Feedback** | Course reviews, suggestions, improvement ideas | Instructor + Admin |
-| **😞 Complaint** | Instructor behavior, course quality, unfair practices | Admin |
-| **❓ Doubt/Question** | Academic doubts beyond course content | Instructor |
-| **🔧 Technical Issue** | Video not playing, download issues, broken links | Support Team |
-| **⚠️ Platform Issue** | Login problems, enrollment bugs, payment issues | Technical Team |
-
-#### Features
-- **Priority Levels** – Auto-assigned based on ticket type
-- **Status Tracking** – Open → In Progress → Resolved → Closed
-- **Response Timeline** – SLA-based response times
-- **Attachment Support** – Upload screenshots for technical issues
-- **Email Notifications** – Updates on ticket status
-- **Ticket History** – View all previous tickets
-- **Rating System** – Rate support quality after resolution
-
-**Why This Matters:**  
-Most LMS platforms have poor support systems. This dedicated ticketing flow ensures every student concern is tracked, prioritized, and resolved systematically.
-
-### 🏆 Peer Learning Reputation System
-
-**Turn Learners into Teachers, Build Real Communities**
-
-#### How Students Earn Reputation
-
-| Activity | Points | Verification |
-|----------|--------|--------------|
-| **Explain Concepts** | +15 | Upvoted by peers/instructor |
-| **Review Peer Assignments** | +10 | Quality review verified |
-| **Help Debug Code** | +20 | Solution marked as helpful |
-| **Answer Forum Questions** | +5 | Answer accepted |
-| **Create Study Guides** | +30 | Downloaded 10+ times |
-| **Mentor Juniors** | +25 | Mentee completes milestone |
-
-#### Reputation Tiers
+- **MVC controllers** call directly into a **Repository + Unit of Work** layer — there is no separate service layer; business rules (ownership checks, publish guards, version isolation) live in the controllers.
+- Each aggregate with custom queries (`Course`, `Enrollment`, `Certificate`) has its own repository interface extending a generic `IRepository<T>`; everything else uses the generic repository directly.
+- `IUnitOfWork` composes the repositories and exposes a single `SaveChangesAsync()`, so a request that touches multiple tables (e.g. enrolling + bumping a course's enrollment count) commits together.
+- Authorization is role-based (`[Authorize(Roles = "...")]`) via ASP.NET Core Identity, not claims-based.
 
 ```
-🌱 Novice        (0-50 points)    - Learning Phase
-📚 Contributor   (51-200 points)  - Active Helper
-⭐ Expert       (201-500 points) - Recognized Authority
-🎓 Mentor       (501-1000 points)- Community Leader
-🏆 Master       (1000+ points)   - Top 1% Contributors
+Controllers (MVC)
+    ↓ calls
+IUnitOfWork → ICourseRepository, IEnrollmentRepository, ICertificateRepository, IRepository<T>
+    ↓ backed by
+ApplicationDbContext (EF Core, Code-First migrations)
 ```
-
-#### Anti-Gaming Mechanisms
-- **Diminishing Returns** – Helping same person repeatedly gives fewer points
-- **Quality Checks** – AI + instructor review of explanations
-- **Downvote System** – Poor quality content reduces reputation
-- **Time Investment** – Points unlock only after peer engagement
-- **Plagiarism Detection** – Copied explanations flagged automatically
-
-#### Employer-Visible Benefits
-- **Reputation Badge** on certificates
-- **Skill Endorsements** from peers
-- **Public Profile** showcasing contributions
-- **Recommendation Letters** auto-generated for top mentors
-
-**Why Most LMS Avoid This:**  
-❌ Hard to prevent gaming  
-❌ Moderation overhead  
-❌ Fear of toxic competition  
-
-**Why It's Powerful:**  
-✅ Learning-by-teaching solidifies knowledge  
-✅ Builds vibrant learning communities  
-✅ Demonstrates soft skills to recruiters  
-✅ Reduces instructor support burden  
-
-### 📊 Skill Score System
-
-**Measure Competence, Not Just Completion**
-
-#### Beyond Course Completion Certificates
-
-Traditional LMS issue certificates for *watching videos*. LearnSphere measures **actual competence**.
-
-#### Skill Score Components
-
-```
-Total Skill Score (0-100)
-├── 40% - Project-Based Assessments
-│   └── Real-world tasks, not multiple choice
-├── 25% - Code Quality (for technical courses)
-│   └── Automated analysis of submitted code
-├── 20% - Peer Review Performance
-│   └── How well you explain concepts to others
-├── 10% - Time Efficiency
-│   └── Problem-solving speed
-└── 5% - Consistency
-    └── Regular practice over time
-```
-
-#### Skill Gap Analysis
-
-**After course completion, students see:**
-
-| Skill Area | Your Score | Industry Standard | Gap Analysis |
-|------------|------------|-------------------|--------------|
-| API Design | 72/100 | 80/100 | 📈 Practice REST principles |
-| Database Optimization | 45/100 | 75/100 | ⚠️ Review indexing strategies |
-| Authentication | 88/100 | 70/100 | ✅ Above average |
-
-#### Job-Readiness Indicator
-
-```
-🎯 Skill Score: 78/100
-📊 Industry Benchmark: 75/100
-✅ Job Ready for: Junior Backend Developer
-📈 Next Level: Senior Role (requires 85+)
-
-Recommended Actions:
-1. Complete "Advanced Database Design" module
-2. Build 2 more portfolio projects
-3. Contribute to open-source (reputation boost)
-```
-
-**Why LMS Don't Have This:**  
-❌ Hard to standardize across courses  
-❌ Requires subjective evaluation  
-❌ Instructors resist grading complexity  
-
-**Why It's Powerful:**  
-✅ Recruiters trust competence scores over completion certificates  
-✅ Students understand their exact gaps  
-✅ Differentiates serious learners from passive viewers  
-✅ Data-driven career guidance  
-
-### 🧠 Post-Course Memory Decay Prevention
-
-**Maintain Real Competence After Completion**
-
-#### The Forgetting Curve Problem
-
-Research shows learners forget **70% of course content within 30 days** without reinforcement. Most LMS stop caring after course completion. LearnSphere doesn't.
-
-#### Spaced Repetition System
-
-```
-Course Completion
-  ↓
-+7 days  → Quick Quiz (10 min) - Core concepts
-  ↓
-+30 days → Skill Check (20 min) - Practical application
-  ↓
-+90 days → Full Re-assessment (45 min) - Comprehensive test
-  ↓
-+180 days → Project Challenge - Build something real
-```
-
-#### Forgotten Skill Detection
-
-**Adaptive Testing Algorithm:**
-
-1. **Identify Weak Areas** – Questions you got wrong
-2. **Re-test Periodically** – Spaced intervals (7, 30, 90 days)
-3. **Detect Skill Decay** – Score drops below 70%
-4. **Auto-suggest Refreshers** – "You scored 55% on SQL Joins. Revisit Lesson 4?"
-
-#### Refresher Micro-Courses
-
-- **5-10 minute modules** reviewing key concepts
-- **Interactive challenges** not passive videos
-- **Real-world scenarios** not theoretical questions
-- **Progress tracking** shows retention improvement
-
-#### Gamification for Long-Term Engagement
-
-| Streak | Reward |
-|--------|--------|
-| 30-day refresh streak | 🔥 "Consistent Learner" badge |
-| 90-day retention score >80% | 🏅 "Knowledge Keeper" achievement |
-| 1-year active skill maintenance | 💎 "Lifelong Learner" certification |
-
-#### Employer Integration
-
-**Certificate Validity Indicator:**
-
-```
-John Doe - Full-Stack Development Certificate
-Issued: Jan 2025
-Last Verified: Nov 2025
-Retention Score: 87% ✅ (Skills actively maintained)
-
-vs.
-
-Jane Smith - Full-Stack Development Certificate  
-Issued: Jan 2024
-Last Verified: Jan 2024
-Retention Score: N/A ⚠️ (Skills may have decayed)
-```
-
-**Recruiters can trust certificates with recent verification.**
-
-#### Why LMS Ignore This
-
-❌ Engagement ends at course completion (revenue captured)  
-❌ Long-term tracking is complex  
-❌ Students resist "more tests"  
-
-#### Why It's Game-Changing
-
-✅ Maintains actual competence, not just credentials  
-✅ Certificates stay valuable over time  
-✅ Students build habits of continuous learning  
-✅ Data shows who's truly job-ready vs. credential collectors  
-✅ Instructors get feedback on content retention  
-
-**Implementation Note:**  
-This feature uses background jobs (Hangfire/Quartz) to schedule periodic assessments and email reminders.
-
----
-
-## 🧠 Design Philosophy
-
-LearnSphere was architected with **real-world educational challenges** in mind:
-
-### 🎯 Problem-Solving Approach
-
-| Challenge | Solution |
-|-----------|----------|
-| **Content Updates Break Progress** | Course versioning preserves learner continuity |
-| **Quality Control** | Multi-stage approval workflow ensures standards |
-| **Learner Dropouts** | Prerequisite system builds foundational knowledge |
-| **Engagement Metrics** | Comprehensive analytics inform content strategy |
-| **Scalability Limits** | Clean architecture supports horizontal scaling |
-| **Security Vulnerabilities** | Defense-in-depth security implementation |
-
-### 💡 Design Principles
-
-- **User-Centric Design** – Interfaces designed for ease of use
-- **Data-Driven Decisions** – Analytics inform feature development
-- **Fail-Safe Operations** – Graceful error handling and recovery
-- **Performance Optimization** – Lazy loading and caching strategies
-- **Accessibility** – WCAG-compliant interfaces
-- **Mobile-First Thinking** – Responsive design throughout
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Backend Framework
-
-| Technology | Purpose |
-|------------|---------|
-| **ASP.NET Core MVC** | Web application framework |
-| **C# 10+** | Primary programming language |
-| **Entity Framework Core** | Object-relational mapper (ORM) |
-| **LINQ** | Data query and manipulation |
-
-### Database
-
-```
-Supported Databases:
-├── SQLite (Default - zero setup, great for local dev)
-└── SQL Server (Swap in for production deployments)
-
-Configuration: Code-First Migrations
-```
-
-### Frontend Technologies
-
-- **Razor Views** – Server-side templating engine
-- **Bootstrap 5** – Responsive CSS framework
-- **JavaScript (ES6+)** – Client-side interactivity
-- **AJAX** – Asynchronous data operations
-
-### Development Practices
-
-✅ Dependency Injection (Built-in DI Container)  
-✅ Repository Pattern (Data access abstraction)  
-✅ Service Layer (Business logic separation)  
-✅ Async/Await (Non-blocking operations)  
-✅ Global Exception Handling (Centralized error management)  
-✅ Structured Logging (Diagnostic tracking)  
-✅ Model Validation (Data integrity)
+| Layer | Technology |
+|-------|------------|
+| Framework | ASP.NET Core MVC (.NET 9) |
+| Language | C# |
+| ORM | Entity Framework Core, Code-First migrations |
+| Auth | ASP.NET Core Identity (cookie-based, role-based authorization) |
+| Database | SQLite by default (zero setup); swappable for SQL Server |
+| Frontend | Razor views, Bootstrap 5 |
 
 ---
 
 ## 🗄️ Database Schema
 
-### Core Entities
-
 ```
-User
-├── Id (PK)
-├── Email
-├── PasswordHash
-├── Role (FK → Role)
-└── Profile Information
+User (extends IdentityUser)
+├── FirstName, LastName, DateOfBirth, Bio, ProfilePictureUrl
+├── CreatedAt, LastLoginAt
+└── Roles: Student / Instructor / Admin
+
+Category
+├── Name (unique), Description
 
 Course
-├── Id (PK)
-├── Title
-├── Description
-├── InstructorId (FK → User)
-├── CategoryId (FK → Category)
-├── Status (Draft/Review/Published)
-└── CurrentVersionId (FK → CourseVersion)
+├── Title, Description, ThumbnailUrl
+├── InstructorId (FK → User), CategoryId (FK → Category)
+├── Status: Draft / UnderReview / Published / Archived
+├── Difficulty, EstimatedDurationHours
+├── CurrentVersionId (FK → CourseVersion)
+└── TotalEnrollments, AverageRating
 
 CourseVersion
-├── Id (PK)
-├── CourseId (FK → Course)
-├── VersionNumber
-├── PublishedDate
-└── Changelog
+├── CourseId (FK → Course), VersionNumber, Changelog, IsActive
 
 Lesson
-├── Id (PK)
 ├── CourseVersionId (FK → CourseVersion)
-├── Title
-├── ContentType (Video/PDF/Text)
-├── ContentUrl
-└── OrderIndex
+├── Title, Description, OrderIndex, DurationMinutes, IsFree
+├── ContentType: Video / PDF / Text / Interactive / Quiz
+└── ContentUrl, Content (inline text body)
 
 Enrollment
-├── Id (PK)
-├── UserId (FK → User)
-├── CourseId (FK → Course)
-├── EnrolledDate
-└── Status (Active/Completed/Dropped)
+├── UserId (FK → User), CourseId (FK → Course)
+├── CourseVersionId (FK → CourseVersion) — locked at enroll time
+├── Status: Active / Completed / Dropped / Suspended
+└── ProgressPercentage, EnrolledDate, CompletedDate
 
 Progress
-├── Id (PK)
-├── EnrollmentId (FK → Enrollment)
-├── LessonId (FK → Lesson)
-├── CompletedDate
-└── TimeSpent
+├── EnrollmentId (FK → Enrollment), LessonId (FK → Lesson)
+└── IsCompleted, CompletedDate, TimeSpentMinutes
 
 Certificate
-├── Id (PK)
-├── UserId (FK → User)
-├── CourseId (FK → Course)
-├── VerificationId (Unique)
+├── UserId (FK → User), CourseId (FK → Course)
+├── VerificationId (unique)
 └── IssuedDate
 ```
 
-### Key Relationships
-
-- **One-to-Many**: Course → Lessons, User → Enrollments, User → Tickets
-- **Many-to-One**: Enrollment → CourseVersion (version locking), Ticket → User
-- **One-to-One**: User + Course → Certificate (uniqueness constraint)
-
-### Extended Entities (Innovation Features)
-
-```
-SupportTicket
-├── Id (PK)
-├── UserId (FK → User)
-├── TicketType (Feedback/Complaint/Doubt/Technical/Platform)
-├── Subject
-├── Description
-├── Status (Open/InProgress/Resolved/Closed)
-├── Priority (Low/Medium/High/Critical)
-├── AssignedTo (FK → User - Support/Instructor/Admin)
-├── CreatedDate
-└── ResolvedDate
-
-ReputationScore
-├── Id (PK)
-├── UserId (FK → User)
-├── TotalPoints
-├── Tier (Novice/Contributor/Expert/Mentor/Master)
-├── ActivityLog (JSON - tracks point sources)
-└── LastUpdated
-
-SkillScore
-├── Id (PK)
-├── UserId (FK → User)
-├── CourseId (FK → Course)
-├── OverallScore (0-100)
-├── ProjectScore
-├── CodeQualityScore
-├── PeerReviewScore
-├── TimeEfficiencyScore
-└── JobReadinessStatus
-
-RetentionTest
-├── Id (PK)
-├── UserId (FK → User)
-├── CourseId (FK → Course)
-├── TestDate
-├── Score
-├── ScheduledDate (Next test)
-└── DecayDetected (Boolean)
-```
+**Why `Enrollment.CourseVersionId` is locked at enroll time:** when an instructor publishes a new version of a course, `Course.CurrentVersionId` moves forward, but each `Enrollment` keeps pointing at the version it was created against. This is what lets an instructor update course content without silently changing what an in-progress student sees.
 
 ---
 
@@ -643,126 +157,59 @@ RetentionTest
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
+- **.NET SDK 9.0+**
+- **Git**
 
-- **.NET SDK 9.0+** ([Download](https://dotnet.microsoft.com/download))
-- **Visual Studio 2022** or **VS Code** with C# extension
-- **Git** (for version control)
-
-No separate database server is required — the project uses SQLite by default, so the database is just a local file.
+No database server is required — SQLite runs as a local file.
 
 ### Installation
 
-#### 1️⃣ Clone the Repository
-
 ```bash
-git clone https://github.com/nishatayub/learnsphere-lms.git
-cd learnsphere-lms
-```
-
-#### 2️⃣ Restore Dependencies
-
-```bash
+git clone https://github.com/nishatayub/LearnSphere.git
+cd LearnSphere
 dotnet restore
-```
-
-#### 3️⃣ Configure Database Connection
-
-The default `appsettings.json` already points to a local SQLite file, so this step can be skipped for local development:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Data Source=LearnSphere.db"
-  }
-}
-```
-
-To use SQL Server instead, swap the `Microsoft.EntityFrameworkCore.Sqlite` package for `Microsoft.EntityFrameworkCore.SqlServer`, update `Program.cs` to call `UseSqlServer(...)`, and point the connection string at your instance.
-
-#### 4️⃣ Apply Database Migrations
-
-```bash
 dotnet ef database update
-```
-
-#### 5️⃣ Run the Application
-
-```bash
 dotnet run
 ```
 
-The application will be available at: `https://localhost:5001`
-
-### 🎓 Seeding Test Data
-
-To populate the database with sample data for testing:
-
-```bash
-dotnet run --seed
-```
-
-### 🧪 Running Tests
-
-```bash
-dotnet test
-```
+The app seeds itself with demo data (categories, one course, and one account per role) on first run — see below.
 
 ---
 
-## 🧪 Testing Strategy
+## 🔑 Seeded Demo Accounts
 
-### Test Coverage
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@learnsphere.com` | `Admin@123` |
+| Instructor | `instructor@learnsphere.com` | `Instructor@123` |
+| Student | `student@learnsphere.com` | `Student@123` |
 
-- ✅ **Unit Tests** – Service layer and business logic
-- ✅ **Integration Tests** – Repository and database operations
-- ✅ **Manual Testing** – UI workflows and edge cases
+Use these to explore all three roles without registering new accounts. New self-registration always creates a **Student** — an admin has to promote an account to Instructor via Manage Users.
 
-### Key Test Scenarios
+---
 
-| Category | Test Cases |
-|----------|------------|
-| **Authentication** | Login, registration, password reset, role assignment |
-| **Authorization** | Role restrictions, claim validation, unauthorized access |
-| **Enrollment** | Prerequisites, duplicate enrollment, course capacity |
-| **File Upload** | Type validation, size limits, malicious file detection |
-| **Progress Tracking** | Completion logic, percentage calculation, edge cases |
-| **Certification** | Generation, uniqueness, verification |
+## ⚠️ What's Not Built Yet
+
+Being upfront about scope, since a fair number of student LMS projects overclaim here:
+
+- **No automated tests.** Every feature in this README was verified manually against a running instance, not with a test suite.
+- **No file uploads.** Lessons hold text content or an external URL (e.g. a hosted video link) — there's no upload/storage pipeline for video or PDF files.
+- **No prerequisite system.** Courses don't declare dependencies on other courses.
+- **No real email delivery.** "Forgot password" generates a real Identity reset token but displays the link on-screen instead of emailing it (no SMTP configured).
+- **No quizzes/assignments.** `ContentType.Quiz` exists on the `Lesson` enum but there's no quiz-taking or grading feature behind it.
+- **No discussion/forum feature.**
 
 ---
 
 ## 🗺️ Roadmap
 
-### 🚀 Phase 1: Foundation (Complete)
-- ✅ Core MVC architecture
-- ✅ User authentication & authorization
-- ✅ Course and lesson management
-- ✅ Basic progress tracking
+Realistic next steps, roughly in priority order:
 
-### 📈 Phase 2: Enhancement (In Progress)
-- 🔄 REST API development
-- 🔄 Advanced analytics dashboard
-- 🔄 Discussion forums
-- 🔄 Assignment submission system
-
-### 🌟 Phase 3: Expansion (Planned)
-- 📱 Mobile application (iOS/Android)
-- 🔔 Real-time notifications (SignalR)
-- 🤖 AI-powered course recommendations
-- 💳 Payment gateway integration
-- 🌍 Multi-language support (i18n)
-- ☁️ Cloud storage integration (Azure Blob/AWS S3)
-- 🎥 Live streaming capabilities
-- 📊 Advanced reporting & export
-
-### 🚀 Phase 4: Innovation Features (Competitive Differentiators)
-- 🎫 **Support Ticket System** – Multi-category student support workflow
-- 🏆 **Peer Learning Reputation** – Gamified community learning system
-- 📊 **Skill Score System** – Competence measurement beyond completion
-- 🧠 **Memory Decay Prevention** – Spaced repetition & skill retention tracking
-- 🎯 **Job Readiness Score** – Industry benchmark comparison
-- 🤝 **Peer Code Review** – Collaborative learning assignments
-- 📈 **Dynamic Skill Gap Analysis** – Personalized learning paths
+- Automated test coverage (xUnit + an in-memory/SQLite test database)
+- Real file upload for lesson videos/PDFs (local disk or blob storage)
+- Email delivery for password reset and course-approval notifications
+- Quiz/assessment content type
+- API layer for a future mobile client
 
 ---
 
@@ -788,49 +235,8 @@ Commercial use requires explicit permission.
 
 **Aspiring Software Engineer | Backend & Full-Stack Developer**
 
-Passionate about building scalable, secure, and user-centric applications.  
-LearnSphere represents a commitment to **clean code**, **thoughtful architecture**, and **real-world problem solving**.
-
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/nishatayub)
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nishatayub)
 [![Portfolio](https://img.shields.io/badge/Portfolio-FF5722?style=for-the-badge&logo=google-chrome&logoColor=white)](https://nishatayub.vercel.app)
-
-</div>
-
----
-
-## ⭐ Project Highlights
-
-> **This LMS is more than a project—it's a production-grade system demonstrating:**
-
-<div align="center">
-
-| 🏗️ Clean Architecture | 🔒 Security Awareness |
-|:---:|:---:|
-| **Scalable Design** | **Backend Fundamentals** |
-
-</div>
-
-### 📊 Technical Achievements
-
-- 🎯 **Separation of Concerns** – Layered architecture prevents code coupling
-- 🔐 **Defense-in-Depth Security** – Multiple security layers protect data
-- 📈 **Optimized Performance** – Efficient queries and caching strategies
-- 🧪 **Testable Codebase** – High code coverage with meaningful tests
-- 📚 **Comprehensive Documentation** – Self-documenting code with XML comments
-- 🎨 **Professional UI/UX** – Intuitive interfaces for all user types
-
----
-
-<div align="center">
-
-### 🌟 Built with passion for education and technology 🌟
-
-**If you find this project valuable, please consider giving it a ⭐ on GitHub!**
-
----
-
-*"Education is the most powerful weapon which you can use to change the world."*  
-— Nelson Mandela
 
 </div>
