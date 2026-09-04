@@ -40,7 +40,7 @@
                                 <a class="nav-link text-dark" asp-controller="Certificates" asp-action="Index">My Certificates</a>
                             </li>
                             <li class="nav-item">
-                                <span class="nav-link text-dark">Hi, @User.Identity.Name</span>
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Profile">Hi, @User.Identity.Name</a>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
