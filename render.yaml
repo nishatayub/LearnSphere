@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: learnsphere
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        value: "Data Source=LearnSphere.db"
+      # Set these in the Render dashboard (Environment tab) rather than here -
+      # render.yaml is committed to the repo and these are secrets.
+      - key: Email__SmtpUsername
+        sync: false
+      - key: Email__SmtpPassword
+        sync: false
