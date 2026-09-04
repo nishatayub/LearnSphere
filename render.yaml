@@ -10,9 +10,7 @@ services:
         value: Production
       - key: ConnectionStrings__DefaultConnection
         value: "Data Source=LearnSphere.db"
-      # Set these in the Render dashboard (Environment tab) rather than here -
-      # render.yaml is committed to the repo and these are secrets.
-      - key: Email__SmtpUsername
-        sync: false
-      - key: Email__SmtpPassword
+      # Set this in the Render dashboard (Environment tab) rather than here -
+      # render.yaml is committed to the repo and this is a secret.
+      - key: Email__ApiKey
         sync: false

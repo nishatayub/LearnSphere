@@ -198,7 +198,7 @@ The repo includes a `Dockerfile` and a `render.yaml` blueprint for deploying to 
 
 1. Push this repo to your own GitHub account (or fork it).
 2. In the Render dashboard, choose **New > Blueprint** and point it at the repo — Render reads `render.yaml` and creates the web service automatically (Docker runtime, free plan).
-3. If you want real email delivery, open the service's **Environment** tab in Render and set `Email__SmtpUsername` and `Email__SmtpPassword` yourself (they're intentionally left out of `render.yaml` since that file is committed to the repo). For Gmail, `SmtpUsername` is your Gmail address and `SmtpPassword` is a [Gmail App Password](https://myaccount.google.com/apppasswords), not your normal account password.
+3. If you want real email delivery, open the service's **Environment** tab in Render and set `Email__ApiKey` to a [Resend](https://resend.com) API key yourself (it's intentionally left out of `render.yaml` since that file is committed to the repo). Email goes through Resend's HTTP API rather than raw SMTP because free hosts like Render commonly block outbound SMTP ports (587/465/25) - HTTPS on port 443 isn't affected. Without a Resend account, an unverified sandbox account can only send to the email address you signed up with.
 4. Deploy. The container binds to whatever port Render assigns via the `PORT` environment variable automatically (see `Program.cs`).
 
 ### A note on the database in this setup
