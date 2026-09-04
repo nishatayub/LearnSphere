@@ -1,13 +1,16 @@
-using System.Net;
-using System.Net.Mail;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Options;
+using MimeKit;
 
 namespace LearnSphere.Services
 {
     /// <summary>
-    /// Sends real email over SMTP. Only active when SmtpUsername/SmtpPassword are
-    /// configured (see EmailSenderExtensions.AddEmailSender) - otherwise the app
-    /// falls back to NullEmailSender so local development needs no SMTP account.
+    /// Sends real email over SMTP using MailKit rather than System.Net.Mail.SmtpClient -
+    /// the legacy SmtpClient has long-standing TLS/socket issues connecting to Gmail from
+    /// Linux containers. Only active when SmtpUsername/SmtpPassword are configured (see
+    /// Program.cs) - otherwise the app falls back to NullEmailSender so local development
+    /// needs no SMTP account.
     /// </summary>
     public class SmtpEmailSender : IEmailSender
     {
@@ -26,28 +29,24 @@ namespace LearnSphere.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
-            using var client = new SmtpClient(_options.SmtpHost, _options.SmtpPort)
-            {
-                EnableSsl = true,
-                Credentials = new NetworkCredential(_options.SmtpUsername, _options.SmtpPassword)
-            };
+            var message = new MimeMessage();
+            // Gmail (and most SMTP providers) reject a From address that isn't the
+            // authenticated account, so use SmtpUsername rather than SenderEmail.
+            message.From.Add(new MailboxAddress(_options.SenderName, _options.SmtpUsername));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+            message.Subject = subject;
+            message.Body = new TextPart("html") { Text = htmlBody };
 
-            using var message = new MailMessage
-            {
-                // Gmail (and most SMTP providers) reject a From address that isn't the
-                // authenticated account, so use SmtpUsername rather than SenderEmail.
-                From = new MailAddress(_options.SmtpUsername, _options.SenderName),
-                Subject = subject,
-                Body = htmlBody,
-                IsBodyHtml = true
-            };
-            message.To.Add(toEmail);
+            using var client = new SmtpClient();
 
             try
             {
-                await client.SendMailAsync(message);
+                await client.ConnectAsync(_options.SmtpHost, _options.SmtpPort, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_options.SmtpUsername, _options.SmtpPassword);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
             }
-            catch (SmtpException ex)
+            catch (Exception ex)
             {
                 // Don't let a mail delivery failure break the request that triggered it
                 // (e.g. approving a course) - log it and move on.
