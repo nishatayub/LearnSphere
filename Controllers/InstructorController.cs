@@ -146,7 +146,7 @@ namespace LearnSphere.Controllers
         {
             var course = await GetOwnedCourseAsync(courseId);
 
-            if (course == null)
+            if (course == null || course.Status != CourseStatus.Draft)
             {
                 return NotFound();
             }
@@ -157,16 +157,16 @@ namespace LearnSphere.Controllers
 
             if (!hasLessons)
             {
-                TempData["Error"] = "Add at least one lesson before publishing.";
+                TempData["Error"] = "Add at least one lesson before submitting for review.";
                 return RedirectToAction(nameof(Lessons), new { courseId });
             }
 
-            course.Status = CourseStatus.Published;
+            course.Status = CourseStatus.UnderReview;
             course.UpdatedAt = DateTime.UtcNow;
             _unitOfWork.Courses.Update(course);
             await _unitOfWork.SaveChangesAsync();
 
-            TempData["Message"] = "Course published! Students can now find it in the catalog.";
+            TempData["Message"] = "Submitted for review. An admin will publish it once approved.";
             return RedirectToAction(nameof(Index));
         }
 

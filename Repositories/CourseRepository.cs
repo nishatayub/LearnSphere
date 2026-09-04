@@ -25,6 +25,16 @@ namespace LearnSphere.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Course>> GetCoursesByStatusAsync(CourseStatus status)
+        {
+            return await _dbSet
+                .Where(c => c.Status == status)
+                .Include(c => c.Instructor)
+                .Include(c => c.Category)
+                .OrderBy(c => c.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Course>> GetCoursesByInstructorAsync(string instructorId)
         {
             return await _dbSet

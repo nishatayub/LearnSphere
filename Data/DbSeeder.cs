@@ -41,6 +41,25 @@ namespace LearnSphere.Data
 
         private static async Task<User> SeedUsersAsync(UserManager<User> userManager)
         {
+            // Create Admin
+            var admin = await userManager.FindByEmailAsync("admin@learnsphere.com");
+            if (admin == null)
+            {
+                admin = new User
+                {
+                    UserName = "admin@learnsphere.com",
+                    Email = "admin@learnsphere.com",
+                    FirstName = "Alex",
+                    LastName = "Morgan",
+                    DateOfBirth = new DateTime(1990, 3, 10),
+                    EmailConfirmed = true,
+                    Bio = "Platform administrator."
+                };
+
+                await userManager.CreateAsync(admin, "Admin@123");
+                await userManager.AddToRoleAsync(admin, "Admin");
+            }
+
             // Create Instructor
             var instructor = await userManager.FindByEmailAsync("instructor@learnsphere.com");
             if (instructor == null)

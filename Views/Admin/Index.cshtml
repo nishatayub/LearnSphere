@@ -1,0 +1,80 @@
+@model LearnSphere.Models.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h1 class="mb-4">Admin Dashboard</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <div class="col">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@Model.TotalUsers</div>
+                <div class="text-muted small">Total Users</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@Model.TotalStudents</div>
+                <div class="text-muted small">Students</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@Model.TotalInstructors</div>
+                <div class="text-muted small">Instructors</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@Model.PublishedCourses / @Model.TotalCourses</div>
+                <div class="text-muted small">Published Courses</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="h4 mb-3">Pending Review (@Model.PendingReviewCourses)</h2>
+
+@if (!Model.CoursesPendingReview.Any())
+{
+    <p class="text-muted">Nothing waiting on review right now.</p>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Instructor</th>
+                <th>Category</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in Model.CoursesPendingReview)
+            {
+                <tr>
+                    <td>@course.Title</td>
+                    <td>@course.Instructor.FirstName @course.Instructor.LastName</td>
+                    <td>@course.Category.Name</td>
+                    <td class="text-end">
+                        <a asp-controller="Admin" asp-action="Review" asp-route-id="@course.Id" class="btn btn-sm btn-outline-primary">Review</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

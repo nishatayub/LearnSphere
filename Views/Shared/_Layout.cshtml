@@ -33,7 +33,13 @@
                     <ul class="navbar-nav">
                         @if (User.Identity is { IsAuthenticated: true })
                         {
-                            @if (User.IsInRole("Instructor"))
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
+                                </li>
+                            }
+                            else if (User.IsInRole("Instructor"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Instructor" asp-action="Index">Instructor Dashboard</a>
