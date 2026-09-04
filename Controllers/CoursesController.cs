@@ -108,7 +108,12 @@ namespace LearnSphere.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
-            var lessons = course.CurrentVersion?.Lessons.OrderBy(l => l.OrderIndex) ?? Enumerable.Empty<Lesson>();
+            // Always pull lessons from the version the student enrolled under, not the
+            // course's current version - those can diverge once an instructor publishes
+            // a new version, and enrolled students shouldn't see content shift under them.
+            var lessons = (await _unitOfWork.Lessons
+                .FindAsync(l => l.CourseVersionId == enrollment.CourseVersionId))
+                .OrderBy(l => l.OrderIndex);
             var progressRecords = await _unitOfWork.ProgressRecords
                 .FindAsync(p => p.EnrollmentId == enrollment.Id);
             var completedLessonIds = progressRecords.Where(p => p.IsCompleted).Select(p => p.LessonId).ToHashSet();
@@ -145,7 +150,9 @@ namespace LearnSphere.Controllers
                 return RedirectToAction(nameof(Details), new { id = courseId });
             }
 
-            var orderedLessons = (course.CurrentVersion?.Lessons.OrderBy(l => l.OrderIndex) ?? Enumerable.Empty<Lesson>())
+            var orderedLessons = (await _unitOfWork.Lessons
+                .FindAsync(l => l.CourseVersionId == enrollment.CourseVersionId))
+                .OrderBy(l => l.OrderIndex)
                 .ToList();
             var lesson = orderedLessons.FirstOrDefault(l => l.Id == lessonId);
 

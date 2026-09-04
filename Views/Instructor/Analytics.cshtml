@@ -1,0 +1,77 @@
+@model LearnSphere.Models.ViewModels.CourseAnalyticsViewModel
+
+@{
+    ViewData["Title"] = Model.Course.Title + " - Analytics";
+}
+
+<p class="text-muted mb-1"><a asp-controller="Instructor" asp-action="Index">My Courses</a></p>
+<h1 class="mb-4">@Model.Course.Title &middot; Analytics</h1>
+
+<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <div class="col">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@Model.TotalEnrollments</div>
+                <div class="text-muted small">Total Enrollments</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@Model.ActiveCount</div>
+                <div class="text-muted small">Active</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@Model.CompletedCount</div>
+                <div class="text-muted small">Completed</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@Model.AverageProgress%</div>
+                <div class="text-muted small">Average Progress</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="h4 mb-3">Lesson Engagement</h2>
+
+@if (!Model.LessonStats.Any())
+{
+    <p class="text-muted">No lessons to report on yet.</p>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Lesson</th>
+                <th>Completed By</th>
+                <th>Completion Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var stat in Model.LessonStats)
+            {
+                <tr>
+                    <td>@stat.Lesson.OrderIndex. @stat.Lesson.Title</td>
+                    <td>@stat.CompletedCount / @Model.TotalEnrollments</td>
+                    <td style="min-width: 160px;">
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" style="width: @(stat.CompletionRate)%"></div>
+                        </div>
+                        <span class="text-muted small">@stat.CompletionRate%</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

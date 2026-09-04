@@ -1,0 +1,32 @@
+@model LearnSphere.Models.ViewModels.NewVersionViewModel
+@using LearnSphere.Models
+@{
+    var course = (Course)ViewBag.Course;
+    ViewData["Title"] = "New Version";
+}
+
+<p class="text-muted mb-1"><a asp-controller="Instructor" asp-action="Lessons" asp-route-courseId="@course.Id">@course.Title</a></p>
+<h1 class="mb-4">Create a New Version</h1>
+
+<p class="text-muted">
+    This clones the current lessons into a new version you can edit freely. Students already
+    enrolled keep learning from the version they started with, so nothing changes under them mid-course.
+</p>
+
+<form asp-controller="Instructor" asp-action="NewVersion" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="CourseId" />
+
+    <div class="mb-3">
+        <label asp-for="Changelog" class="form-label"></label>
+        <textarea asp-for="Changelog" class="form-control" rows="3" placeholder="e.g. Updated lesson 2 with new examples"></textarea>
+        <span asp-validation-for="Changelog" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create New Version</button>
+    <a asp-controller="Instructor" asp-action="Lessons" asp-route-courseId="@course.Id" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
