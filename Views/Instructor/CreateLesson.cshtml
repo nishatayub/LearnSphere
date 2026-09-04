@@ -1,0 +1,67 @@
+@model LearnSphere.Models.ViewModels.LessonFormViewModel
+@using LearnSphere.Models
+@{
+    var course = (Course)ViewBag.Course;
+    ViewData["Title"] = "New Lesson";
+}
+
+<p class="text-muted mb-1"><a asp-controller="Instructor" asp-action="Lessons" asp-route-courseId="@course.Id">@course.Title</a></p>
+<h1 class="mb-4">New Lesson</h1>
+
+<form asp-controller="Instructor" asp-action="CreateLesson" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="CourseId" />
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="ContentType" class="form-label"></label>
+            <select asp-for="ContentType" class="form-select" asp-items="Html.GetEnumSelectList<ContentType>()"></select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="OrderIndex" class="form-label"></label>
+            <input asp-for="OrderIndex" type="number" class="form-control" />
+            <span asp-validation-for="OrderIndex" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="DurationMinutes" class="form-label"></label>
+            <input asp-for="DurationMinutes" type="number" class="form-control" />
+            <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Content" class="form-label"></label>
+        <textarea asp-for="Content" class="form-control" rows="6" placeholder="Used for text lessons"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ContentUrl" class="form-label"></label>
+        <input asp-for="ContentUrl" class="form-control" placeholder="Used for video/PDF lessons" />
+        <span asp-validation-for="ContentUrl" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="IsFree" class="form-check-input" />
+        <label asp-for="IsFree" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Lesson</button>
+    <a asp-controller="Instructor" asp-action="Lessons" asp-route-courseId="@course.Id" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
