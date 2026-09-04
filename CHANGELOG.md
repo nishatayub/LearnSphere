@@ -8,10 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planning
-- Automated test coverage
 - File upload for lesson videos/PDFs
 - Email delivery (password reset, course-approval notifications)
 - Quiz/assessment content type
+
+---
+
+## [0.7.0] - 2026-09-04 — Docs & Test Coverage
+
+### Added
+- xUnit test project (`tests/LearnSphere.Tests`) covering controller-level business
+  rules against a real SQLite database with real ASP.NET Core Identity, including
+  regression tests for the progress-percentage and version-isolation bugs fixed
+  earlier in [0.4.0] and [0.5.0]
+
+### Changed
+- Rewrote README/CHANGELOG/CONTRIBUTING to match what's actually implemented -
+  the previous README described a service layer, unit/integration tests, and
+  several entire fictional subsystems (support tickets, peer reputation,
+  spaced-repetition skill retention) that were never built
+- Fixed CI (`.github/workflows/dotnet.yml`), which had targeted .NET 8 since before
+  the SQLite migration even though the project has been on .NET 9 the whole time
 
 ---
 
