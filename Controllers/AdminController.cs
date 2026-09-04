@@ -1,6 +1,7 @@
 using LearnSphere.Models;
 using LearnSphere.Models.ViewModels;
 using LearnSphere.Repositories.Interfaces;
+using LearnSphere.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,13 @@ namespace LearnSphere.Controllers
 
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<User> _userManager;
+        private readonly IEmailSender _emailSender;
 
-        public AdminController(IUnitOfWork unitOfWork, UserManager<User> userManager)
+        public AdminController(IUnitOfWork unitOfWork, UserManager<User> userManager, IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         public async Task<IActionResult> Index()
@@ -72,6 +75,8 @@ namespace LearnSphere.Controllers
             _unitOfWork.Courses.Update(course);
             await _unitOfWork.SaveChangesAsync();
 
+            await NotifyInstructorAsync(course, approved: true);
+
             TempData["Message"] = $"\"{course.Title}\" approved and published.";
             return RedirectToAction(nameof(Index));
         }
@@ -92,8 +97,34 @@ namespace LearnSphere.Controllers
             _unitOfWork.Courses.Update(course);
             await _unitOfWork.SaveChangesAsync();
 
+            await NotifyInstructorAsync(course, approved: false);
+
             TempData["Message"] = $"\"{course.Title}\" sent back to the instructor as a draft.";
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task NotifyInstructorAsync(Course course, bool approved)
+        {
+            if (!_emailSender.IsConfigured)
+            {
+                return;
+            }
+
+            var instructor = await _userManager.FindByIdAsync(course.InstructorId);
+
+            if (instructor?.Email == null)
+            {
+                return;
+            }
+
+            var subject = approved
+                ? $"\"{course.Title}\" was approved"
+                : $"\"{course.Title}\" needs changes";
+            var body = approved
+                ? $"<p>Good news - your course <strong>{course.Title}</strong> was approved and is now live in the catalog.</p>"
+                : $"<p>Your course <strong>{course.Title}</strong> was sent back to draft by an admin. Review it and submit again when it's ready.</p>";
+
+            await _emailSender.SendEmailAsync(instructor.Email, subject, body);
         }
 
         [HttpGet]

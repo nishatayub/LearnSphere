@@ -16,9 +16,9 @@ namespace LearnSphere.Tests
             _admin = _fixture.CreateUser("admin@test.com", "Admin");
         }
 
-        private AdminController CreateController(User actingAs)
+        private AdminController CreateController(User actingAs, NullEmailSenderForTests? emailSender = null)
         {
-            var controller = new AdminController(_fixture.UnitOfWork, _fixture.UserManager);
+            var controller = new AdminController(_fixture.UnitOfWork, _fixture.UserManager, emailSender ?? new NullEmailSenderForTests());
             TestControllerContext.ActAs(controller, actingAs);
             return controller;
         }
@@ -118,6 +118,60 @@ namespace LearnSphere.Tests
 
             var reloaded = await _fixture.UnitOfWork.Courses.GetByIdAsync(course.Id);
             Assert.Equal(CourseStatus.Published, reloaded!.Status);
+        }
+
+        [Fact]
+        public async Task Approve_WithEmailConfigured_NotifiesTheInstructor()
+        {
+            var category = new Category { Name = "Programming" };
+            await _fixture.UnitOfWork.Categories.AddAsync(category);
+            await _fixture.UnitOfWork.SaveChangesAsync();
+
+            var instructor = _fixture.CreateUser("instructor@test.com", "Instructor");
+            var course = new Course
+            {
+                Title = "Course",
+                Description = "Description",
+                InstructorId = instructor.Id,
+                CategoryId = category.Id,
+                Status = CourseStatus.UnderReview
+            };
+            await _fixture.UnitOfWork.Courses.AddAsync(course);
+            await _fixture.UnitOfWork.SaveChangesAsync();
+
+            var emailSender = new NullEmailSenderForTests { IsConfigured = true };
+            var controller = CreateController(_admin, emailSender);
+            await controller.Approve(course.Id);
+
+            var sent = Assert.Single(emailSender.SentEmails);
+            Assert.Equal("instructor@test.com", sent.ToEmail);
+            Assert.Contains("approved", sent.Subject);
+        }
+
+        [Fact]
+        public async Task Approve_WithoutEmailConfigured_DoesNotAttemptToSend()
+        {
+            var category = new Category { Name = "Programming" };
+            await _fixture.UnitOfWork.Categories.AddAsync(category);
+            await _fixture.UnitOfWork.SaveChangesAsync();
+
+            var instructor = _fixture.CreateUser("instructor@test.com", "Instructor");
+            var course = new Course
+            {
+                Title = "Course",
+                Description = "Description",
+                InstructorId = instructor.Id,
+                CategoryId = category.Id,
+                Status = CourseStatus.UnderReview
+            };
+            await _fixture.UnitOfWork.Courses.AddAsync(course);
+            await _fixture.UnitOfWork.SaveChangesAsync();
+
+            var emailSender = new NullEmailSenderForTests { IsConfigured = false };
+            var controller = CreateController(_admin, emailSender);
+            await controller.Approve(course.Id);
+
+            Assert.Empty(emailSender.SentEmails);
         }
 
         public void Dispose() => _fixture.Dispose();

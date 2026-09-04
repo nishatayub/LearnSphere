@@ -1,5 +1,6 @@
 using LearnSphere.Models;
 using LearnSphere.Models.ViewModels;
+using LearnSphere.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +11,13 @@ namespace LearnSphere.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IEmailSender _emailSender;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailSender = emailSender;
         }
 
         [HttpGet]
@@ -238,8 +241,24 @@ namespace LearnSphere.Controllers
             if (user != null)
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                ViewBag.ResetLink = Url.Action(nameof(ResetPassword), "Account",
-                    new { email = user.Email, token }, Request.Scheme);
+                var resetLink = Url.Action(nameof(ResetPassword), "Account",
+                    new { email = user.Email, token }, Request.Scheme)!;
+
+                if (_emailSender.IsConfigured)
+                {
+                    await _emailSender.SendEmailAsync(
+                        user.Email!,
+                        "Reset your LearnSphere password",
+                        $"<p>Someone requested a password reset for your LearnSphere account.</p>" +
+                        $"<p><a href=\"{resetLink}\">Click here to reset your password</a></p>" +
+                        $"<p>If you didn't request this, you can ignore this email.</p>");
+                }
+                else
+                {
+                    // No SMTP configured (local dev) - show the link directly instead
+                    // of pretending an email went out.
+                    ViewBag.ResetLink = resetLink;
+                }
             }
 
             // Always show the same confirmation, whether or not the account
