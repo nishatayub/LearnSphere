@@ -25,6 +25,7 @@ Built with ASP.NET Core MVC
 - [Database Schema](#-database-schema)
 - [Getting Started](#-getting-started)
 - [Seeded Demo Accounts](#-seeded-demo-accounts)
+- [Testing](#-testing)
 - [What's Not Built Yet](#-whats-not-built-yet)
 - [Roadmap](#-roadmap)
 - [License](#-license)
@@ -188,11 +189,22 @@ Use these to explore all three roles without registering new accounts. New self-
 
 ---
 
+## 🧪 Testing
+
+`tests/LearnSphere.Tests` is an xUnit project that runs controller-level tests against a real SQLite database (in-memory, one connection per test) with a real ASP.NET Core Identity stack behind it — not a mock. Coverage focuses on the business rules controllers enforce and, specifically, on two real bugs that were caught and fixed during manual verification: progress percentage not recomputing correctly in a single request, and the Learn page reading lessons from the course's current version instead of the version a student actually enrolled under.
+
+```bash
+dotnet test tests/LearnSphere.Tests/LearnSphere.Tests.csproj
+```
+
+This isn't full coverage — it doesn't touch Razor views, Identity's built-in flows (login/register/password reset), or file-level repository behavior beyond what the controller tests exercise incidentally. Everything else in this README was verified manually against a running instance.
+
+---
+
 ## ⚠️ What's Not Built Yet
 
 Being upfront about scope, since a fair number of student LMS projects overclaim here:
 
-- **No automated tests.** Every feature in this README was verified manually against a running instance, not with a test suite.
 - **No file uploads.** Lessons hold text content or an external URL (e.g. a hosted video link) — there's no upload/storage pipeline for video or PDF files.
 - **No prerequisite system.** Courses don't declare dependencies on other courses.
 - **No real email delivery.** "Forgot password" generates a real Identity reset token but displays the link on-screen instead of emailing it (no SMTP configured).
@@ -205,7 +217,7 @@ Being upfront about scope, since a fair number of student LMS projects overclaim
 
 Realistic next steps, roughly in priority order:
 
-- Automated test coverage (xUnit + an in-memory/SQLite test database)
+- Broaden test coverage to Identity flows and repositories directly
 - Real file upload for lesson videos/PDFs (local disk or blob storage)
 - Email delivery for password reset and course-approval notifications
 - Quiz/assessment content type
