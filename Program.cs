@@ -53,13 +53,16 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
 
-// Configure Email - real SMTP when credentials are present, otherwise a
+// Configure Email - Resend's HTTP API when an API key is present, otherwise a
 // no-op sender so local development needs no email account at all.
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
 var emailOptions = builder.Configuration.GetSection(EmailOptions.SectionName).Get<EmailOptions>();
-if (!string.IsNullOrWhiteSpace(emailOptions?.SmtpUsername) && !string.IsNullOrWhiteSpace(emailOptions.SmtpPassword))
+if (!string.IsNullOrWhiteSpace(emailOptions?.ApiKey))
 {
-    builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
+    builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>(client =>
+    {
+        client.BaseAddress = new Uri("https://api.resend.com/");
+    });
 }
 else
 {
