@@ -22,6 +22,9 @@ namespace LearnSphere.Repositories
         private IRepository<Progress>? _progressRecords;
         private ICertificateRepository? _certificates;
         private IRepository<CourseVersion>? _courseVersions;
+        private IRepository<QuizQuestion>? _quizQuestions;
+        private IRepository<QuizOption>? _quizOptions;
+        private IRepository<QuizAttempt>? _quizAttempts;
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -47,8 +50,17 @@ namespace LearnSphere.Repositories
         public ICertificateRepository Certificates =>
             _certificates ??= new CertificateRepository(_context);
 
-        public IRepository<CourseVersion> CourseVersions => 
+        public IRepository<CourseVersion> CourseVersions =>
             _courseVersions ??= new Repository<CourseVersion>(_context);
+
+        public IRepository<QuizQuestion> QuizQuestions =>
+            _quizQuestions ??= new Repository<QuizQuestion>(_context);
+
+        public IRepository<QuizOption> QuizOptions =>
+            _quizOptions ??= new Repository<QuizOption>(_context);
+
+        public IRepository<QuizAttempt> QuizAttempts =>
+            _quizAttempts ??= new Repository<QuizAttempt>(_context);
 
         public async Task<int> SaveChangesAsync()
         {

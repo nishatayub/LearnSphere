@@ -537,6 +537,153 @@ namespace LearnSphere.Controllers
             return RedirectToAction(nameof(Lessons), new { courseId });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ManageQuiz(int courseId, int lessonId)
+        {
+            var lesson = await GetOwnedLessonAsync(courseId, lessonId);
+
+            if (lesson == null)
+            {
+                return NotFound();
+            }
+
+            var questions = (await _unitOfWork.QuizQuestions.FindAsync(q => q.LessonId == lessonId))
+                .OrderBy(q => q.OrderIndex)
+                .ToList();
+            var options = (await _unitOfWork.QuizOptions
+                .FindAsync(o => questions.Select(q => q.Id).Contains(o.QuizQuestionId)))
+                .ToLookup(o => o.QuizQuestionId);
+
+            foreach (var question in questions)
+            {
+                question.Options = options[question.Id].ToList();
+            }
+
+            ViewBag.CourseId = courseId;
+            ViewBag.Lesson = lesson;
+            return View(questions);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AddQuizQuestion(int courseId, int lessonId)
+        {
+            var lesson = await GetOwnedLessonAsync(courseId, lessonId);
+
+            if (lesson == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Lesson = lesson;
+            return View(new QuizQuestionFormViewModel { CourseId = courseId, LessonId = lessonId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddQuizQuestion(QuizQuestionFormViewModel model)
+        {
+            var lesson = await GetOwnedLessonAsync(model.CourseId, model.LessonId);
+
+            if (lesson == null)
+            {
+                return NotFound();
+            }
+
+            var filledOptionCount = EnumerateOptions(model).Count();
+            if (model.CorrectOption > filledOptionCount)
+            {
+                ModelState.AddModelError(nameof(model.CorrectOption), "The correct option must point at one of the options you filled in.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Lesson = lesson;
+                return View(model);
+            }
+
+            var nextOrder = (await _unitOfWork.QuizQuestions.FindAsync(q => q.LessonId == model.LessonId))
+                .Select(q => (int?)q.OrderIndex)
+                .Max() ?? 0;
+
+            var question = new QuizQuestion
+            {
+                LessonId = model.LessonId,
+                Text = model.Text,
+                OrderIndex = nextOrder + 1
+            };
+            await _unitOfWork.QuizQuestions.AddAsync(question);
+            await _unitOfWork.SaveChangesAsync();
+
+            foreach (var (optionText, index) in EnumerateOptions(model))
+            {
+                await _unitOfWork.QuizOptions.AddAsync(new QuizOption
+                {
+                    QuizQuestionId = question.Id,
+                    Text = optionText,
+                    IsCorrect = index == model.CorrectOption
+                });
+            }
+            await _unitOfWork.SaveChangesAsync();
+
+            TempData["Message"] = "Question added.";
+            return RedirectToAction(nameof(ManageQuiz), new { courseId = model.CourseId, lessonId = model.LessonId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteQuizQuestion(int courseId, int lessonId, int questionId)
+        {
+            var lesson = await GetOwnedLessonAsync(courseId, lessonId);
+
+            if (lesson == null)
+            {
+                return NotFound();
+            }
+
+            var question = await _unitOfWork.QuizQuestions.GetByIdAsync(questionId);
+
+            if (question == null || question.LessonId != lessonId)
+            {
+                return NotFound();
+            }
+
+            var options = await _unitOfWork.QuizOptions.FindAsync(o => o.QuizQuestionId == questionId);
+            _unitOfWork.QuizOptions.RemoveRange(options);
+            _unitOfWork.QuizQuestions.Remove(question);
+            await _unitOfWork.SaveChangesAsync();
+
+            TempData["Message"] = "Question removed.";
+            return RedirectToAction(nameof(ManageQuiz), new { courseId, lessonId });
+        }
+
+        private static IEnumerable<(string Text, int Index)> EnumerateOptions(QuizQuestionFormViewModel model)
+        {
+            yield return (model.Option1, 1);
+            yield return (model.Option2, 2);
+            if (!string.IsNullOrWhiteSpace(model.Option3))
+            {
+                yield return (model.Option3, 3);
+            }
+            if (!string.IsNullOrWhiteSpace(model.Option4))
+            {
+                yield return (model.Option4, 4);
+            }
+        }
+
+        private async Task<Lesson?> GetOwnedLessonAsync(int courseId, int lessonId)
+        {
+            var course = await GetOwnedCourseAsync(courseId);
+
+            if (course == null)
+            {
+                return null;
+            }
+
+            var lesson = await _unitOfWork.Lessons.GetByIdAsync(lessonId);
+
+            return lesson != null && lesson.CourseVersionId == course.CurrentVersionId ? lesson : null;
+        }
+
         private async Task<Course?> GetOwnedCourseAsync(int courseId)
         {
             var instructorId = _userManager.GetUserId(User)!;

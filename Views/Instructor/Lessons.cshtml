@@ -45,6 +45,10 @@ else
                     <div class="text-muted small">@lesson.DurationMinutes min</div>
                 </div>
                 <div>
+                    @if (lesson.ContentType == LearnSphere.Models.ContentType.Quiz)
+                    {
+                        <a asp-controller="Instructor" asp-action="ManageQuiz" asp-route-courseId="@course.Id" asp-route-lessonId="@lesson.Id" class="btn btn-sm btn-outline-secondary">Manage Quiz</a>
+                    }
                     <a asp-controller="Instructor" asp-action="EditLesson" asp-route-courseId="@course.Id" asp-route-lessonId="@lesson.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
                     <form asp-controller="Instructor" asp-action="DeleteLesson" method="post" class="d-inline" onsubmit="return confirm('Remove this lesson?');">
                         <input type="hidden" name="courseId" value="@course.Id" />

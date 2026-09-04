@@ -1,0 +1,63 @@
+@model LearnSphere.Models.ViewModels.QuizQuestionFormViewModel
+@using LearnSphere.Models
+@{
+    var lesson = (Lesson)ViewBag.Lesson;
+    ViewData["Title"] = "New Question";
+}
+
+<p class="text-muted mb-1"><a asp-controller="Instructor" asp-action="ManageQuiz" asp-route-courseId="@Model.CourseId" asp-route-lessonId="@Model.LessonId">@lesson.Title</a></p>
+<h1 class="mb-4">New Question</h1>
+
+<form asp-controller="Instructor" asp-action="AddQuizQuestion" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="CourseId" />
+    <input type="hidden" asp-for="LessonId" />
+
+    <div class="mb-3">
+        <label asp-for="Text" class="form-label"></label>
+        <input asp-for="Text" class="form-control" />
+        <span asp-validation-for="Text" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Option1" class="form-label"></label>
+        <input asp-for="Option1" class="form-control" />
+        <span asp-validation-for="Option1" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Option2" class="form-label"></label>
+        <input asp-for="Option2" class="form-control" />
+        <span asp-validation-for="Option2" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Option3" class="form-label"></label>
+        <input asp-for="Option3" class="form-control" />
+        <span asp-validation-for="Option3" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Option4" class="form-label"></label>
+        <input asp-for="Option4" class="form-control" />
+        <span asp-validation-for="Option4" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CorrectOption" class="form-label"></label>
+        <select asp-for="CorrectOption" class="form-select">
+            <option value="1">Option 1</option>
+            <option value="2">Option 2</option>
+            <option value="3">Option 3</option>
+            <option value="4">Option 4</option>
+        </select>
+        <span asp-validation-for="CorrectOption" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Question</button>
+    <a asp-controller="Instructor" asp-action="ManageQuiz" asp-route-courseId="@Model.CourseId" asp-route-lessonId="@Model.LessonId" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

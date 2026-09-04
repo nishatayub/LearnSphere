@@ -176,7 +176,88 @@ namespace LearnSphere.Controllers
                 NextLessonId = currentIndex < orderedLessons.Count - 1 ? orderedLessons[currentIndex + 1].Id : null
             };
 
+            if (lesson.ContentType == ContentType.Quiz)
+            {
+                viewModel.QuizQuestions = (await _unitOfWork.QuizQuestions
+                    .FindAsync(q => q.LessonId == lessonId))
+                    .OrderBy(q => q.OrderIndex)
+                    .ToList();
+
+                var questionIds = viewModel.QuizQuestions.Select(q => q.Id).ToHashSet();
+                var allOptions = await _unitOfWork.QuizOptions
+                    .FindAsync(o => questionIds.Contains(o.QuizQuestionId));
+                var optionsByQuestion = allOptions.ToLookup(o => o.QuizQuestionId);
+
+                foreach (var question in viewModel.QuizQuestions)
+                {
+                    question.Options = optionsByQuestion[question.Id].ToList();
+                }
+
+                viewModel.LatestQuizAttempt = (await _unitOfWork.QuizAttempts
+                    .FindAsync(a => a.EnrollmentId == enrollment.Id && a.LessonId == lessonId))
+                    .OrderByDescending(a => a.AttemptedDate)
+                    .FirstOrDefault();
+            }
+
             return View(viewModel);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitQuiz(int courseId, int lessonId, Dictionary<int, int> answers)
+        {
+            var userId = _userManager.GetUserId(User)!;
+            var enrollment = await _unitOfWork.Enrollments.GetByUserAndCourseAsync(userId, courseId);
+
+            if (enrollment == null)
+            {
+                return NotFound();
+            }
+
+            var lesson = await _unitOfWork.Lessons.GetByIdAsync(lessonId);
+
+            if (lesson == null || lesson.CourseVersionId != enrollment.CourseVersionId || lesson.ContentType != ContentType.Quiz)
+            {
+                return NotFound();
+            }
+
+            var questions = await _unitOfWork.QuizQuestions.FindAsync(q => q.LessonId == lessonId);
+            var questionIds = questions.Select(q => q.Id).ToHashSet();
+            var options = await _unitOfWork.QuizOptions.FindAsync(o => questionIds.Contains(o.QuizQuestionId));
+            var correctOptionIdByQuestion = options
+                .Where(o => o.IsCorrect)
+                .ToDictionary(o => o.QuizQuestionId, o => o.Id);
+
+            var totalQuestions = questionIds.Count;
+            var correctAnswers = questionIds.Count(questionId =>
+                answers.TryGetValue(questionId, out var selectedOptionId) &&
+                correctOptionIdByQuestion.TryGetValue(questionId, out var correctOptionId) &&
+                selectedOptionId == correctOptionId);
+
+            var scorePercentage = totalQuestions == 0
+                ? 0
+                : Math.Round(100m * correctAnswers / totalQuestions, 2);
+
+            var attempt = new QuizAttempt
+            {
+                EnrollmentId = enrollment.Id,
+                LessonId = lessonId,
+                TotalQuestions = totalQuestions,
+                CorrectAnswers = correctAnswers,
+                ScorePercentage = scorePercentage,
+                Passed = scorePercentage >= 70
+            };
+            await _unitOfWork.QuizAttempts.AddAsync(attempt);
+            await _unitOfWork.SaveChangesAsync();
+
+            if (attempt.Passed)
+            {
+                await MarkLessonCompletedAsync(enrollment, lessonId);
+                await RecomputeEnrollmentProgressAsync(enrollment, userId, courseId);
+            }
+
+            return RedirectToAction(nameof(Lesson), new { courseId, lessonId });
         }
 
         [Authorize]
@@ -197,6 +278,13 @@ namespace LearnSphere.Controllers
             if (lesson == null || lesson.CourseVersionId != enrollment.CourseVersionId)
             {
                 return NotFound();
+            }
+
+            if (lesson.ContentType == ContentType.Quiz)
+            {
+                // Quiz lessons are only completed by passing SubmitQuiz - block the
+                // manual toggle so it can't be used to bypass grading via a direct POST.
+                return BadRequest("Quiz lessons are completed by passing the quiz, not by marking them complete manually.");
             }
 
             var progress = (await _unitOfWork.ProgressRecords
@@ -227,6 +315,56 @@ namespace LearnSphere.Controllers
             // hits the database directly, so an unsaved add/update wouldn't be counted.
             await _unitOfWork.SaveChangesAsync();
 
+            await RecomputeEnrollmentProgressAsync(enrollment, userId, courseId);
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return RedirectToAction(nameof(Learn), new { id = courseId });
+        }
+
+        /// <summary>
+        /// Marks a lesson complete without the toggle-off behavior ToggleLesson has -
+        /// used by the quiz pass path, where re-submitting a passing attempt should
+        /// never accidentally un-complete a lesson.
+        /// </summary>
+        private async Task MarkLessonCompletedAsync(Enrollment enrollment, int lessonId)
+        {
+            var progress = (await _unitOfWork.ProgressRecords
+                .FindAsync(p => p.EnrollmentId == enrollment.Id && p.LessonId == lessonId))
+                .FirstOrDefault();
+
+            if (progress == null)
+            {
+                progress = new Progress
+                {
+                    EnrollmentId = enrollment.Id,
+                    LessonId = lessonId,
+                    IsCompleted = true,
+                    CompletedDate = DateTime.UtcNow
+                };
+                await _unitOfWork.ProgressRecords.AddAsync(progress);
+            }
+            else if (!progress.IsCompleted)
+            {
+                progress.IsCompleted = true;
+                progress.CompletedDate = DateTime.UtcNow;
+                _unitOfWork.ProgressRecords.Update(progress);
+            }
+
+            progress.LastAccessedDate = DateTime.UtcNow;
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Recomputes an enrollment's progress percentage/status from the Progress
+        /// table and issues a certificate at 100% - shared by ToggleLesson and
+        /// SubmitQuiz so both paths recompute the exact same way.
+        /// </summary>
+        private async Task RecomputeEnrollmentProgressAsync(Enrollment enrollment, string userId, int courseId)
+        {
             var totalLessons = (await _unitOfWork.Lessons
                 .FindAsync(l => l.CourseVersionId == enrollment.CourseVersionId))
                 .Count();
@@ -253,13 +391,6 @@ namespace LearnSphere.Controllers
 
             _unitOfWork.Enrollments.Update(enrollment);
             await _unitOfWork.SaveChangesAsync();
-
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-
-            return RedirectToAction(nameof(Learn), new { id = courseId });
         }
 
         private async Task IssueCertificateIfNeededAsync(string userId, int courseId)

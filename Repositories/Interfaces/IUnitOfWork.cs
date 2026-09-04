@@ -16,7 +16,10 @@ namespace LearnSphere.Repositories.Interfaces
         IRepository<Progress> ProgressRecords { get; }
         ICertificateRepository Certificates { get; }
         IRepository<CourseVersion> CourseVersions { get; }
-        
+        IRepository<QuizQuestion> QuizQuestions { get; }
+        IRepository<QuizOption> QuizOptions { get; }
+        IRepository<QuizAttempt> QuizAttempts { get; }
+
         // Transaction management
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();
