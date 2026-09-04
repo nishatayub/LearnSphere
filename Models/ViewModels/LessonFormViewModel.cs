@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace LearnSphere.Models.ViewModels
 {
@@ -26,6 +27,11 @@ namespace LearnSphere.Models.ViewModels
         [StringLength(500)]
         [Display(Name = "Content URL (video/PDF)")]
         public string? ContentUrl { get; set; }
+
+        [Display(Name = "Or upload a file (video/PDF)")]
+        public IFormFile? UploadedFile { get; set; }
+
+        public string? ExistingContentUrl { get; set; }
 
         [Range(1, 999)]
         [Display(Name = "Order")]
