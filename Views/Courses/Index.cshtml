@@ -1,5 +1,7 @@
 @model LearnSphere.Models.ViewModels.CourseListViewModel
 @using Microsoft.AspNetCore.Mvc.Rendering
+@using LearnSphere.Models
+@using LearnSphere.Models.ViewModels
 
 @{
     ViewData["Title"] = "Courses";
@@ -8,13 +10,21 @@
 <h1 class="mb-4">Courses</h1>
 
 <form asp-controller="Courses" asp-action="Index" method="get" class="row g-2 mb-4">
-    <div class="col-sm-6">
+    <div class="col-sm-4">
         <input type="text" name="search" value="@Model.SearchTerm" class="form-control" placeholder="Search courses..." />
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-2">
         <select name="categoryId" class="form-select" asp-items="@(new SelectList(Model.Categories, "Id", "Name", Model.CategoryId))">
             <option value="">All categories</option>
         </select>
+    </div>
+    <div class="col-sm-2">
+        <select asp-for="Difficulty" class="form-select" asp-items="Html.GetEnumSelectList<DifficultyLevel>()">
+            <option value="">Any difficulty</option>
+        </select>
+    </div>
+    <div class="col-sm-2">
+        <select asp-for="Sort" class="form-select" asp-items="Html.GetEnumSelectList<CourseSortOrder>()"></select>
     </div>
     <div class="col-sm-2">
         <button type="submit" class="btn btn-primary w-100">Filter</button>
@@ -45,4 +55,24 @@ else
             </div>
         }
     </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
+                        <a class="page-link"
+                           asp-controller="Courses" asp-action="Index"
+                           asp-route-search="@Model.SearchTerm"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-difficulty="@Model.Difficulty"
+                           asp-route-sort="@Model.Sort"
+                           asp-route-page="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
 }
