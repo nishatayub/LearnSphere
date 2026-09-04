@@ -18,7 +18,12 @@ namespace LearnSphere.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index(string? search, int? categoryId)
+        public async Task<IActionResult> Index(
+            string? search,
+            int? categoryId,
+            DifficultyLevel? difficulty,
+            CourseSortOrder sort = CourseSortOrder.Newest,
+            int page = 1)
         {
             var courses = await _unitOfWork.Courses.GetPublishedCoursesAsync();
 
@@ -34,12 +39,34 @@ namespace LearnSphere.Controllers
                 courses = courses.Where(c => c.CategoryId == categoryId.Value);
             }
 
+            if (difficulty.HasValue)
+            {
+                courses = courses.Where(c => c.Difficulty == difficulty.Value);
+            }
+
+            courses = sort switch
+            {
+                CourseSortOrder.TitleAZ => courses.OrderBy(c => c.Title),
+                CourseSortOrder.MostEnrolled => courses.OrderByDescending(c => c.TotalEnrollments),
+                _ => courses.OrderByDescending(c => c.CreatedAt)
+            };
+
+            var totalCount = courses.Count();
+            const int pageSize = 6;
+            page = Math.Max(page, 1);
+            var pagedCourses = courses.Skip((page - 1) * pageSize).Take(pageSize);
+
             var viewModel = new CourseListViewModel
             {
-                Courses = courses,
+                Courses = pagedCourses,
                 Categories = await _unitOfWork.Categories.GetAllAsync(),
                 SearchTerm = search,
-                CategoryId = categoryId
+                CategoryId = categoryId,
+                Difficulty = difficulty,
+                Sort = sort,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
             };
 
             return View(viewModel);
