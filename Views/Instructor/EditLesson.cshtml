@@ -8,10 +8,11 @@
 <p class="text-muted mb-1"><a asp-controller="Instructor" asp-action="Lessons" asp-route-courseId="@course.Id">@course.Title</a></p>
 <h1 class="mb-4">Edit Lesson</h1>
 
-<form asp-controller="Instructor" asp-action="EditLesson" method="post">
+<form asp-controller="Instructor" asp-action="EditLesson" method="post" enctype="multipart/form-data">
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="CourseId" />
+    <input type="hidden" asp-for="ExistingContentUrl" />
 
     <div class="mb-3">
         <label asp-for="Title" class="form-label"></label>
@@ -52,6 +53,19 @@
         <label asp-for="ContentUrl" class="form-label"></label>
         <input asp-for="ContentUrl" class="form-control" placeholder="Used for video/PDF lessons" />
         <span asp-validation-for="ContentUrl" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="UploadedFile" class="form-label"></label>
+        @if (!string.IsNullOrEmpty(Model.ExistingContentUrl))
+        {
+            <div class="form-text mb-1">
+                Current file: <a href="@Model.ExistingContentUrl" target="_blank" rel="noopener">@Model.ExistingContentUrl</a>
+            </div>
+        }
+        <input asp-for="UploadedFile" type="file" class="form-control" />
+        <span asp-validation-for="UploadedFile" class="text-danger"></span>
+        <div class="form-text">Uploading a new file replaces the content URL above.</div>
     </div>
 
     <div class="form-check mb-3">

@@ -12,11 +12,19 @@ namespace LearnSphere.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<User> _userManager;
+        private readonly IWebHostEnvironment _environment;
+        private readonly IConfiguration _configuration;
 
-        public InstructorController(IUnitOfWork unitOfWork, UserManager<User> userManager)
+        public InstructorController(
+            IUnitOfWork unitOfWork,
+            UserManager<User> userManager,
+            IWebHostEnvironment environment,
+            IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _environment = environment;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -368,6 +376,22 @@ namespace LearnSphere.Controllers
                 return View(model);
             }
 
+            var contentUrl = model.ContentUrl;
+
+            if (model.UploadedFile != null)
+            {
+                var (success, urlOrError) = await TrySaveUploadedFileAsync(model.UploadedFile);
+
+                if (!success)
+                {
+                    ModelState.AddModelError(nameof(model.UploadedFile), urlOrError!);
+                    ViewBag.Course = course;
+                    return View(model);
+                }
+
+                contentUrl = urlOrError;
+            }
+
             var lesson = new Lesson
             {
                 CourseVersionId = course.CurrentVersionId!.Value,
@@ -375,7 +399,7 @@ namespace LearnSphere.Controllers
                 Description = model.Description,
                 ContentType = model.ContentType,
                 Content = model.Content,
-                ContentUrl = model.ContentUrl,
+                ContentUrl = contentUrl,
                 OrderIndex = model.OrderIndex,
                 DurationMinutes = model.DurationMinutes,
                 IsFree = model.IsFree
@@ -415,6 +439,7 @@ namespace LearnSphere.Controllers
                 ContentType = lesson.ContentType,
                 Content = lesson.Content,
                 ContentUrl = lesson.ContentUrl,
+                ExistingContentUrl = lesson.ContentUrl,
                 OrderIndex = lesson.OrderIndex,
                 DurationMinutes = lesson.DurationMinutes,
                 IsFree = lesson.IsFree
@@ -445,11 +470,27 @@ namespace LearnSphere.Controllers
                 return View(model);
             }
 
+            var contentUrl = model.ContentUrl;
+
+            if (model.UploadedFile != null)
+            {
+                var (success, urlOrError) = await TrySaveUploadedFileAsync(model.UploadedFile);
+
+                if (!success)
+                {
+                    ModelState.AddModelError(nameof(model.UploadedFile), urlOrError!);
+                    ViewBag.Course = course;
+                    return View(model);
+                }
+
+                contentUrl = urlOrError;
+            }
+
             lesson.Title = model.Title;
             lesson.Description = model.Description;
             lesson.ContentType = model.ContentType;
             lesson.Content = model.Content;
-            lesson.ContentUrl = model.ContentUrl;
+            lesson.ContentUrl = contentUrl;
             lesson.OrderIndex = model.OrderIndex;
             lesson.DurationMinutes = model.DurationMinutes;
             lesson.IsFree = model.IsFree;
@@ -502,6 +543,43 @@ namespace LearnSphere.Controllers
             var course = await _unitOfWork.Courses.GetByIdAsync(courseId);
 
             return course != null && course.InstructorId == instructorId ? course : null;
+        }
+
+        /// <summary>
+        /// Saves an uploaded lesson file under wwwroot/uploads/lessons and returns its
+        /// public URL. Validates extension and size against the FileUpload section of
+        /// appsettings.json rather than trusting the browser-reported content type.
+        /// </summary>
+        private async Task<(bool Success, string? UrlOrError)> TrySaveUploadedFileAsync(IFormFile file)
+        {
+            var allowedExtensions = _configuration.GetSection("FileUpload:AllowedExtensions").Get<string[]>()
+                ?? Array.Empty<string>();
+            var maxFileSizeMb = _configuration.GetValue("FileUpload:MaxFileSizeMB", 50);
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                return (false, $"'{extension}' isn't an allowed file type. Allowed: {string.Join(", ", allowedExtensions)}");
+            }
+
+            if (file.Length > maxFileSizeMb * 1024L * 1024L)
+            {
+                return (false, $"File is too large. Maximum size is {maxFileSizeMb} MB.");
+            }
+
+            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "lessons");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid():N}{extension}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return (true, $"/uploads/lessons/{fileName}");
         }
     }
 }

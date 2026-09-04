@@ -3,6 +3,7 @@ using LearnSphere.Models;
 using LearnSphere.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace LearnSphere.Tests
 {
@@ -24,9 +25,22 @@ namespace LearnSphere.Tests
             _fixture.UnitOfWork.SaveChangesAsync().GetAwaiter().GetResult();
         }
 
+        private static readonly IConfiguration TestConfiguration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["FileUpload:AllowedExtensions:0"] = ".pdf",
+                ["FileUpload:AllowedExtensions:1"] = ".mp4",
+                ["FileUpload:MaxFileSizeMB"] = "50"
+            })
+            .Build();
+
         private InstructorController CreateController(User user)
         {
-            var controller = new InstructorController(_fixture.UnitOfWork, _fixture.UserManager);
+            var controller = new InstructorController(
+                _fixture.UnitOfWork,
+                _fixture.UserManager,
+                new FakeWebHostEnvironment(),
+                TestConfiguration);
             TestControllerContext.ActAs(controller, user);
             return controller;
         }
@@ -128,6 +142,57 @@ namespace LearnSphere.Tests
 
             var stillExists = await _fixture.UnitOfWork.Lessons.GetByIdAsync(lesson.Id);
             Assert.NotNull(stillExists);
+        }
+
+        private static IFormFile FakeFile(string fileName, int sizeBytes = 100)
+        {
+            var stream = new MemoryStream(new byte[sizeBytes]);
+            return new FormFile(stream, 0, sizeBytes, "UploadedFile", fileName);
+        }
+
+        [Fact]
+        public async Task CreateLesson_WithAllowedFileType_SavesFileAndSetsContentUrl()
+        {
+            var course = await CreateDraftCourseAsync(_instructor);
+            var controller = CreateController(_instructor);
+
+            await controller.CreateLesson(new LessonFormViewModel
+            {
+                CourseId = course.Id,
+                Title = "Lesson with video",
+                ContentType = ContentType.Video,
+                OrderIndex = 1,
+                UploadedFile = FakeFile("lecture.mp4")
+            });
+
+            var lesson = (await _fixture.UnitOfWork.Lessons
+                .FindAsync(l => l.CourseVersionId == course.CurrentVersionId))
+                .Single();
+
+            Assert.NotNull(lesson.ContentUrl);
+            Assert.StartsWith("/uploads/lessons/", lesson.ContentUrl);
+            Assert.EndsWith(".mp4", lesson.ContentUrl);
+        }
+
+        [Fact]
+        public async Task CreateLesson_WithDisallowedFileType_IsRejectedAndNoLessonIsCreated()
+        {
+            var course = await CreateDraftCourseAsync(_instructor);
+            var controller = CreateController(_instructor);
+
+            var result = await controller.CreateLesson(new LessonFormViewModel
+            {
+                CourseId = course.Id,
+                Title = "Lesson with bad file",
+                ContentType = ContentType.Video,
+                OrderIndex = 1,
+                UploadedFile = FakeFile("virus.exe")
+            });
+
+            Assert.IsType<ViewResult>(result);
+            var lessons = await _fixture.UnitOfWork.Lessons
+                .FindAsync(l => l.CourseVersionId == course.CurrentVersionId);
+            Assert.Empty(lessons);
         }
 
         public void Dispose() => _fixture.Dispose();

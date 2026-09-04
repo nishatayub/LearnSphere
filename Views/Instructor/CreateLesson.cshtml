@@ -8,7 +8,7 @@
 <p class="text-muted mb-1"><a asp-controller="Instructor" asp-action="Lessons" asp-route-courseId="@course.Id">@course.Title</a></p>
 <h1 class="mb-4">New Lesson</h1>
 
-<form asp-controller="Instructor" asp-action="CreateLesson" method="post">
+<form asp-controller="Instructor" asp-action="CreateLesson" method="post" enctype="multipart/form-data">
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
     <input type="hidden" asp-for="CourseId" />
 
@@ -51,6 +51,13 @@
         <label asp-for="ContentUrl" class="form-label"></label>
         <input asp-for="ContentUrl" class="form-control" placeholder="Used for video/PDF lessons" />
         <span asp-validation-for="ContentUrl" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="UploadedFile" class="form-label"></label>
+        <input asp-for="UploadedFile" type="file" class="form-control" />
+        <span asp-validation-for="UploadedFile" class="text-danger"></span>
+        <div class="form-text">Uploading a file takes precedence over the Content URL above.</div>
     </div>
 
     <div class="form-check mb-3">
