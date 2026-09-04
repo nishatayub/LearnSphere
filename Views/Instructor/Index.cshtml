@@ -1,0 +1,60 @@
+@model IEnumerable<LearnSphere.Models.Course>
+
+@{
+    ViewData["Title"] = "Instructor Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">My Courses</h1>
+    <a asp-controller="Instructor" asp-action="CreateCourse" class="btn btn-primary">+ New Course</a>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+@if (!Model.Any())
+{
+    <p class="text-muted">You haven't created any courses yet.</p>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Enrollments</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in Model)
+            {
+                <tr>
+                    <td>@course.Title</td>
+                    <td>@course.Category.Name</td>
+                    <td>
+                        <span class="badge @(course.Status == LearnSphere.Models.CourseStatus.Published ? "bg-success" : "bg-secondary")">
+                            @course.Status
+                        </span>
+                    </td>
+                    <td>@course.TotalEnrollments</td>
+                    <td class="text-end">
+                        <a asp-controller="Instructor" asp-action="Lessons" asp-route-courseId="@course.Id" class="btn btn-sm btn-outline-secondary">Lessons</a>
+                        <a asp-controller="Instructor" asp-action="EditCourse" asp-route-id="@course.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        @if (course.Status == LearnSphere.Models.CourseStatus.Draft)
+                        {
+                            <form asp-controller="Instructor" asp-action="Publish" method="post" class="d-inline">
+                                <input type="hidden" name="courseId" value="@course.Id" />
+                                <button type="submit" class="btn btn-sm btn-success">Publish</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

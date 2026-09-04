@@ -1,0 +1,52 @@
+@model IEnumerable<LearnSphere.Models.Lesson>
+@{
+    var course = (LearnSphere.Models.Course)ViewBag.Course;
+    ViewData["Title"] = course.Title + " - Lessons";
+}
+
+<p class="text-muted mb-1"><a asp-controller="Instructor" asp-action="Index">My Courses</a></p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">@course.Title</h1>
+    <a asp-controller="Instructor" asp-action="CreateLesson" asp-route-courseId="@course.Id" class="btn btn-primary">+ Add Lesson</a>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No lessons yet. Add one to get started.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var lesson in Model)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>@lesson.OrderIndex. @lesson.Title</strong>
+                    <span class="badge bg-secondary ms-2">@lesson.ContentType</span>
+                    @if (lesson.IsFree)
+                    {
+                        <span class="badge bg-success ms-1">Free</span>
+                    }
+                    <div class="text-muted small">@lesson.DurationMinutes min</div>
+                </div>
+                <div>
+                    <a asp-controller="Instructor" asp-action="EditLesson" asp-route-courseId="@course.Id" asp-route-lessonId="@lesson.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <form asp-controller="Instructor" asp-action="DeleteLesson" method="post" class="d-inline" onsubmit="return confirm('Remove this lesson?');">
+                        <input type="hidden" name="courseId" value="@course.Id" />
+                        <input type="hidden" name="lessonId" value="@lesson.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </div>
+            </li>
+        }
+    </ul>
+}

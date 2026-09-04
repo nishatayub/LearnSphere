@@ -1,0 +1,58 @@
+@model LearnSphere.Models.ViewModels.CourseFormViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using LearnSphere.Models
+
+@{
+    ViewData["Title"] = "Edit Course";
+}
+
+<h1 class="mb-4">Edit Course</h1>
+
+<form asp-controller="Instructor" asp-action="EditCourse" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="CategoryId" class="form-label"></label>
+            <select asp-for="CategoryId" class="form-select" asp-items="@(new SelectList(Model.Categories, "Id", "Name"))"></select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Difficulty" class="form-label"></label>
+            <select asp-for="Difficulty" class="form-select" asp-items="Html.GetEnumSelectList<DifficultyLevel>()"></select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="EstimatedDurationHours" class="form-label"></label>
+            <input asp-for="EstimatedDurationHours" type="number" class="form-control" />
+            <span asp-validation-for="EstimatedDurationHours" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="ThumbnailUrl" class="form-label"></label>
+            <input asp-for="ThumbnailUrl" class="form-control" />
+            <span asp-validation-for="ThumbnailUrl" class="text-danger"></span>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-controller="Instructor" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
