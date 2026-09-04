@@ -1,4 +1,4 @@
-name: .NET Build and Test
+name: .NET Build
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build and Test
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -26,18 +26,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
 
-    - name: Run tests
-      run: dotnet test tests/LearnSphere.Tests/LearnSphere.Tests.csproj --no-build --configuration Release --verbosity normal --logger trx --results-directory "TestResults"
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results
-        path: TestResults
-
-    - name: Publish
-      run: dotnet publish LearnSphere.csproj --no-build --configuration Release --output ./publish
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

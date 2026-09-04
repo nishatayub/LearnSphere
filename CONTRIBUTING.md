@@ -73,22 +73,21 @@ No database server install is needed — the project uses SQLite by default.
 
 ### Branch Strategy
 
-We use Git Flow:
+We use trunk-based development — every feature branches directly off `main` and merges back via PR:
 
 ```
-main          - Production-ready code
-  └── develop - Integration branch
-        ├── feature/* - New features
-        ├── bugfix/*  - Bug fixes
-        └── hotfix/*  - Urgent production fixes
+main
+  ├── feature/* - New features
+  ├── fix/*     - Bug fixes
+  └── docs/*    - Documentation-only changes
 ```
 
 ### Creating a Feature Branch
 
 ```bash
-# Update your local develop branch
-git checkout develop
-git pull upstream develop
+# Update your local main branch
+git checkout main
+git pull origin main
 
 # Create a new feature branch
 git checkout -b feature/your-feature-name
@@ -142,9 +141,8 @@ public class EnrollmentValidator
 
 ### Architecture Guidelines
 
-- **Controllers** - Handle HTTP requests only, delegate to services
-- **Services** - Contain business logic
-- **Repositories** - Data access only
+- **Controllers** - Handle HTTP requests and contain the business rules for their area (ownership checks, workflow guards, etc.) - there is no separate service layer
+- **Repositories** (`IRepository<T>` + per-aggregate interfaces like `ICourseRepository`) - Data access, exposed through `IUnitOfWork`
 - **ViewModels** - For passing data to views
 - **Models** - Entity classes
 
@@ -153,13 +151,10 @@ public class EnrollmentValidator
 ✅ **DO:**
 - Use async/await for I/O operations
 - Implement proper error handling
-- Add XML documentation comments
-- Write unit tests for services
 - Use dependency injection
-- Follow SOLID principles
+- Keep controller actions focused - extract a private helper (see `GetOwnedCourseAsync` in `InstructorController`) rather than repeating a check inline
 
 ❌ **DON'T:**
-- Put business logic in controllers
 - Use magic numbers or strings
 - Ignore compiler warnings
 - Commit sensitive data
@@ -226,23 +221,18 @@ Closes #45"
 
 1. **Update your branch**
    ```bash
-   git checkout develop
-   git pull upstream develop
+   git checkout main
+   git pull upstream main
    git checkout feature/your-feature
-   git rebase develop
+   git rebase main
    ```
 
-2. **Run tests**
-   ```bash
-   dotnet test
-   ```
-
-3. **Build successfully**
+2. **Build successfully**
    ```bash
    dotnet build --configuration Release
    ```
 
-4. **Self-review your code**
+3. **Self-review your code, and manually exercise the feature in the running app** - there's no automated test suite yet, so this is the only verification step
 
 ### Submitting a PR
 
@@ -264,7 +254,8 @@ Closes #45"
 
 ### PR Requirements
 
-- [ ] All tests pass
+- [ ] Builds successfully
+- [ ] Manually verified in the running app
 - [ ] No merge conflicts
 - [ ] Code follows style guidelines
 - [ ] Documentation updated
@@ -273,10 +264,10 @@ Closes #45"
 
 ### Review Process
 
-1. Automated checks (CI/CD) must pass
+1. CI build (see `.github/workflows/dotnet.yml`) must pass
 2. At least one maintainer approval required
 3. All review comments addressed
-4. Branch is up to date with develop
+4. Branch is up to date with main
 
 ---
 
