@@ -10,6 +10,7 @@ namespace LearnSphere.Repositories.Interfaces
     {
         // Custom queries specific to courses
         Task<IEnumerable<Course>> GetPublishedCoursesAsync();
+        Task<IEnumerable<Course>> GetCoursesByStatusAsync(CourseStatus status);
         Task<IEnumerable<Course>> GetCoursesByInstructorAsync(string instructorId);
         Task<IEnumerable<Course>> GetCoursesByCategoryAsync(int categoryId);
         Task<Course?> GetCourseWithLessonsAsync(int courseId);

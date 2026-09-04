@@ -37,7 +37,11 @@ else
                     <td>@course.Title</td>
                     <td>@course.Category.Name</td>
                     <td>
-                        <span class="badge @(course.Status == LearnSphere.Models.CourseStatus.Published ? "bg-success" : "bg-secondary")">
+                        <span class="badge @(course.Status switch {
+                            LearnSphere.Models.CourseStatus.Published => "bg-success",
+                            LearnSphere.Models.CourseStatus.UnderReview => "bg-warning text-dark",
+                            _ => "bg-secondary"
+                        })">
                             @course.Status
                         </span>
                     </td>
@@ -52,8 +56,12 @@ else
                         {
                             <form asp-controller="Instructor" asp-action="Publish" method="post" class="d-inline">
                                 <input type="hidden" name="courseId" value="@course.Id" />
-                                <button type="submit" class="btn btn-sm btn-success">Publish</button>
+                                <button type="submit" class="btn btn-sm btn-success">Submit for Review</button>
                             </form>
+                        }
+                        else if (course.Status == LearnSphere.Models.CourseStatus.UnderReview)
+                        {
+                            <span class="text-muted small">Awaiting admin approval</span>
                         }
                         else if (course.Status == LearnSphere.Models.CourseStatus.Published)
                         {
