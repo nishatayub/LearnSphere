@@ -172,5 +172,138 @@ namespace LearnSphere.Controllers
             TempData["Message"] = isLockedOut ? $"{user.Email} unlocked." : $"{user.Email} locked out.";
             return RedirectToAction(nameof(Users));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Categories()
+        {
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var allCourses = await _unitOfWork.Courses.GetAllAsync();
+
+            var viewModels = categories
+                .OrderBy(c => c.Name)
+                .Select(c => new CategoryListItemViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    CourseCount = allCourses.Count(course => course.CategoryId == c.Id)
+                });
+
+            return View(viewModels);
+        }
+
+        [HttpGet]
+        public IActionResult CreateCategory()
+        {
+            return View(new CategoryFormViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateCategory(CategoryFormViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var nameTaken = (await _unitOfWork.Categories.GetAllAsync())
+                .Any(c => c.Name.Equals(model.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (nameTaken)
+            {
+                ModelState.AddModelError(nameof(model.Name), "A category with this name already exists.");
+                return View(model);
+            }
+
+            await _unitOfWork.Categories.AddAsync(new Category
+            {
+                Name = model.Name,
+                Description = model.Description
+            });
+            await _unitOfWork.SaveChangesAsync();
+
+            TempData["Message"] = $"Category \"{model.Name}\" created.";
+            return RedirectToAction(nameof(Categories));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditCategory(int id)
+        {
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            return View(new CategoryFormViewModel
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCategory(CategoryFormViewModel model)
+        {
+            var category = await _unitOfWork.Categories.GetByIdAsync(model.Id ?? 0);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var nameTaken = (await _unitOfWork.Categories.GetAllAsync())
+                .Any(c => c.Id != category.Id && c.Name.Equals(model.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (nameTaken)
+            {
+                ModelState.AddModelError(nameof(model.Name), "A category with this name already exists.");
+                return View(model);
+            }
+
+            category.Name = model.Name;
+            category.Description = model.Description;
+            _unitOfWork.Categories.Update(category);
+            await _unitOfWork.SaveChangesAsync();
+
+            TempData["Message"] = "Category updated.";
+            return RedirectToAction(nameof(Categories));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var hasCourses = (await _unitOfWork.Courses.GetAllAsync())
+                .Any(c => c.CategoryId == id);
+
+            if (hasCourses)
+            {
+                TempData["Error"] = $"\"{category.Name}\" still has courses assigned to it and can't be deleted.";
+                return RedirectToAction(nameof(Categories));
+            }
+
+            _unitOfWork.Categories.Remove(category);
+            await _unitOfWork.SaveChangesAsync();
+
+            TempData["Message"] = $"Category \"{category.Name}\" deleted.";
+            return RedirectToAction(nameof(Categories));
+        }
     }
 }
