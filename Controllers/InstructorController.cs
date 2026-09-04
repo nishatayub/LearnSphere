@@ -171,6 +171,22 @@ namespace LearnSphere.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Enrollments(int courseId)
+        {
+            var course = await GetOwnedCourseAsync(courseId);
+
+            if (course == null)
+            {
+                return NotFound();
+            }
+
+            var courseWithEnrollments = await _unitOfWork.Courses.GetCourseWithEnrollmentsAsync(courseId);
+
+            ViewBag.Course = course;
+            return View(courseWithEnrollments!.Enrollments.OrderByDescending(e => e.EnrolledDate));
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Lessons(int courseId)
         {
             var course = await GetOwnedCourseAsync(courseId);
