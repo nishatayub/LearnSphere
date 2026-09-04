@@ -19,10 +19,13 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
+        var publishedCourses = (await _unitOfWork.Courses.GetPublishedCoursesAsync()).ToList();
+
         var viewModel = new HomeIndexViewModel
         {
             Categories = await _unitOfWork.Categories.GetAllAsync(),
-            FeaturedCourses = (await _unitOfWork.Courses.GetPublishedCoursesAsync()).Take(6)
+            FeaturedCourses = publishedCourses.Take(6),
+            TotalPublishedCourses = publishedCourses.Count
         };
 
         return View(viewModel);
