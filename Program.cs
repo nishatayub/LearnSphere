@@ -2,11 +2,19 @@ using LearnSphere.Data;
 using LearnSphere.Models;
 using LearnSphere.Repositories;
 using LearnSphere.Repositories.Interfaces;
-using LearnSphere.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Render (and most container hosts) tell the app which port to listen on via
+// the PORT environment variable rather than appsettings - bind to it directly
+// so the container doesn't need ASPNETCORE_URLS set separately.
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://+:{port}");
+}
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
@@ -64,6 +72,19 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+// Render terminates TLS at its edge and forwards plain HTTP to the container,
+// so without this the app can't tell the original request was HTTPS and
+// UseHttpsRedirection would send visitors into a redirect loop. Clearing the
+// known-proxy allowlist is safe here because Render's edge is the only thing
+// that can reach the container network in the first place.
+var forwardedHeaderOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedHeaderOptions.KnownNetworks.Clear();
+forwardedHeaderOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeaderOptions);
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

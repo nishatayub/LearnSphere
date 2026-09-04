@@ -25,6 +25,7 @@ Built with ASP.NET Core MVC
 - [Database Schema](#-database-schema)
 - [Getting Started](#-getting-started)
 - [Seeded Demo Accounts](#-seeded-demo-accounts)
+- [Deployment](#-deployment)
 - [Testing](#-testing)
 - [What's Not Built Yet](#-whats-not-built-yet)
 - [Roadmap](#-roadmap)
@@ -189,6 +190,36 @@ Use these to explore all three roles without registering new accounts. New self-
 
 ---
 
+## ☁️ Deployment
+
+The repo includes a `Dockerfile` and a `render.yaml` blueprint for deploying to [Render](https://render.com).
+
+### Deploying to Render
+
+1. Push this repo to your own GitHub account (or fork it).
+2. In the Render dashboard, choose **New > Blueprint** and point it at the repo — Render reads `render.yaml` and creates the web service automatically (Docker runtime, free plan).
+3. If you want real email delivery, open the service's **Environment** tab in Render and set `Email__SmtpUsername` and `Email__SmtpPassword` yourself (they're intentionally left out of `render.yaml` since that file is committed to the repo). For Gmail, `SmtpUsername` is your Gmail address and `SmtpPassword` is a [Gmail App Password](https://myaccount.google.com/apppasswords), not your normal account password.
+4. Deploy. The container binds to whatever port Render assigns via the `PORT` environment variable automatically (see `Program.cs`).
+
+### A note on the database in this setup
+
+This deployment uses **SQLite on the container's local disk with no persistent volume** — the simplest option, and enough for a showcase since the app reseeds its demo data (categories, seeded accounts, one course) automatically on every startup via `DbSeeder`. The tradeoff: anything created *between* restarts (new user registrations, courses, enrollments) is lost when the container restarts or redeploys, because Render's free-tier filesystem is ephemeral.
+
+If you want data to actually persist:
+- Add Render's persistent disk add-on and mount it over the app's working directory, or
+- Swap the EF Core provider from `Microsoft.EntityFrameworkCore.Sqlite` to `Npgsql.EntityFrameworkCore.PostgreSQL` and point `ConnectionStrings__DefaultConnection` at a Render-managed Postgres instance (bigger change — new provider, regenerated migrations).
+
+### Running the Docker image locally
+
+```bash
+docker build -t learnsphere .
+docker run -p 8080:8080 -e PORT=8080 learnsphere
+```
+
+Then visit `http://localhost:8080`.
+
+---
+
 ## 🧪 Testing
 
 `tests/LearnSphere.Tests` is an xUnit project that runs controller-level tests against a real SQLite database (in-memory, one connection per test) with a real ASP.NET Core Identity stack behind it — not a mock. Coverage focuses on the business rules controllers enforce and, specifically, on two real bugs that were caught and fixed during manual verification: progress percentage not recomputing correctly in a single request, and the Learn page reading lessons from the course's current version instead of the version a student actually enrolled under.
@@ -205,11 +236,10 @@ This isn't full coverage — it doesn't touch Razor views, Identity's built-in f
 
 Being upfront about scope, since a fair number of student LMS projects overclaim here:
 
-- **No file uploads.** Lessons hold text content or an external URL (e.g. a hosted video link) — there's no upload/storage pipeline for video or PDF files.
 - **No prerequisite system.** Courses don't declare dependencies on other courses.
-- **No real email delivery.** "Forgot password" generates a real Identity reset token but displays the link on-screen instead of emailing it (no SMTP configured).
-- **No quizzes/assignments.** `ContentType.Quiz` exists on the `Lesson` enum but there's no quiz-taking or grading feature behind it.
 - **No discussion/forum feature.**
+- **No assignments** (beyond the multiple-choice quiz content type — no file-submission or peer-graded assignments).
+- Email delivery is real (SMTP) but requires SmtpUsername/SmtpPassword to be configured — without them the app falls back to on-screen links/no-op notifications, which is what local development uses by default.
 
 ---
 
@@ -218,9 +248,8 @@ Being upfront about scope, since a fair number of student LMS projects overclaim
 Realistic next steps, roughly in priority order:
 
 - Broaden test coverage to Identity flows and repositories directly
-- Real file upload for lesson videos/PDFs (local disk or blob storage)
-- Email delivery for password reset and course-approval notifications
-- Quiz/assessment content type
+- Prerequisite system for course dependencies
+- File-submission / peer-graded assignments
 - API layer for a future mobile client
 
 ---
